@@ -5,7 +5,11 @@ class SoundManager {
     this.ctx = null;
     this.muted = false;
     this.speechEnabled = true;
+    this.audioPlayer = new Audio();
+    this.currentVoiceSession = 0;
+    this.audioManifest = null;
     this.initAudioContext();
+    this.loadManifest();
   }
 
   initAudioContext() {
@@ -231,25 +235,50 @@ class SoundManager {
     });
   }
 
+  // Stop any active speech or voice synthesis immediately
+  stopVoice() {
+    this.currentVoiceSession = (this.currentVoiceSession || 0) + 1;
+    if (this.audioPlayer) {
+      try {
+        this.audioPlayer.pause();
+        this.audioPlayer.currentTime = 0;
+        this.audioPlayer.removeAttribute('src');
+        this.audioPlayer.onended = null;
+        this.audioPlayer.onerror = null;
+      } catch (e) {}
+    }
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
+    }
+  }
+
+  // Load pre-rendered audio manifest for 0ms instant playback
+  async loadManifest() {
+    if (this.audioManifest) return;
+    try {
+      const res = await fetch('audio/tts/manifest.json');
+      if (res.ok) {
+        this.audioManifest = await res.json();
+      }
+    } catch (e) {
+      this.audioManifest = {};
+    }
+  }
+
   // Text-To-Speech Read-Aloud Helper - Giọng Nữ Miền Nam Việt Nam (Cô Hoài My)
+  // Đảm bảo: KHÔNG trễ, KHÔNG xen lấn, KHÔNG lặp lại, đọc to rõ trọn vẹn
   speak(text, onEndCallback = null) {
     if (!this.speechEnabled) {
       if (onEndCallback) onEndCallback();
       return;
     }
 
-    // Dừng âm thanh đang phát trước đó
-    if (this.currentAudio) {
-      try {
-        this.currentAudio.pause();
-        this.currentAudio = null;
-      } catch (e) {}
-    }
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
+    // 1. Dừng ngay lập tức mọi âm thanh giọng đọc đang phát trước đó (Không bao giờ xen lấn!)
+    this.stopVoice();
 
-    // Làm sạch chuỗi: loại bỏ icon/emoji và ký tự markdown để giọng đọc tự nhiên, êm dịu
+    // Làm sạch chuỗi: loại bỏ icon/emoji và ký tự markdown
     const cleanText = text
       .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B50}]/gu, '')
       .replace(/[\{\}\[\]\*\#]/g, '')
@@ -261,91 +290,68 @@ class SoundManager {
       return;
     }
 
-    // 1. Ưu tiên cao nhất: Giọng Nữ Miền Nam Hoài My từ endpoint /api/tts
-    const ttsUrl = `/api/tts?text=${encodeURIComponent(cleanText)}`;
-    const audio = new Audio(ttsUrl);
-    this.currentAudio = audio;
-    audio.volume = 1.0;
-    audio.playbackRate = 0.98;
+    if (!this.audioPlayer) {
+      this.audioPlayer = new Audio();
+    }
 
+    const sessionId = this.currentVoiceSession;
     let finished = false;
-    const finish = () => {
+
+    const onComplete = () => {
+      if (this.currentVoiceSession !== sessionId) return; // Stale session, bỏ qua
       if (!finished) {
         finished = true;
-        this.currentAudio = null;
+        this.audioPlayer.onended = null;
+        this.audioPlayer.onerror = null;
         if (onEndCallback) onEndCallback();
       }
     };
 
-    audio.onended = finish;
+    // 2. Tìm tệp âm thanh tĩnh đã kết xuất sẵn (Độ trễ = 0ms!)
+    let audioSrc = null;
+    if (this.audioManifest) {
+      if (this.audioManifest[cleanText]) {
+        audioSrc = this.audioManifest[cleanText];
+      } else {
+        // Chuẩn hóa tên riêng thành 'bé' để dùng âm thanh ngọt ngào của cô giáo đã thu sẵn
+        const normalized = cleanText
+          .replace(/Bé\s+[^\s\,\!\.\?]+/gi, 'Bé')
+          .replace(/[^\s\,\!\.\?]+\s+của cô/gi, 'Bé của cô')
+          .replace(/[^\s\,\!\.\?]+\s+ơi/gi, 'bé ơi')
+          .replace(/[^\s\,\!\.\?]+\s+nha/gi, 'bé nha')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (this.audioManifest[normalized]) {
+          audioSrc = this.audioManifest[normalized];
+        }
+      }
+    }
 
-    // Timeout dự phòng tính theo độ dài câu
-    const timeout = Math.max(2500, cleanText.length * 130);
-    const fallbackTimer = setTimeout(finish, timeout);
+    // Nếu không có trong manifest thì gọi endpoint dynamic /api/tts
+    if (!audioSrc) {
+      audioSrc = `/api/tts?text=${encodeURIComponent(cleanText)}`;
+    }
 
-    audio.onerror = () => {
-      clearTimeout(fallbackTimer);
-      console.warn('Endpoint /api/tts không khả dụng, chuyển sang giọng dự phòng trình duyệt');
-      this.speakViaBrowserFallback(cleanText, onEndCallback);
+    this.audioPlayer.src = audioSrc;
+    this.audioPlayer.volume = 1.0;
+    this.audioPlayer.playbackRate = 1.0;
+    this.audioPlayer.onended = onComplete;
+
+    this.audioPlayer.onerror = () => {
+      if (this.currentVoiceSession !== sessionId) return;
+      console.warn('Không phát được âm thanh từ server, kết thúc an toàn');
+      onComplete();
     };
 
-    const promise = audio.play();
-    if (promise !== undefined) {
-      promise.catch(() => {
-        clearTimeout(fallbackTimer);
-        this.speakViaBrowserFallback(cleanText, onEndCallback);
+    const playPromise = this.audioPlayer.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        // Nếu bị huỷ bởi lượt đọc mới (AbortError) thì bỏ qua
+        if (this.currentVoiceSession !== sessionId) return;
+        if (err.name === 'AbortError') return;
+        console.warn('Audio play error:', err.name);
+        onComplete();
       });
-    }
-  }
-
-  // Dự phòng khi chạy offline hoàn toàn không qua server python
-  speakViaBrowserFallback(text, onEndCallback = null) {
-    if (!('speechSynthesis' in window)) {
-      if (onEndCallback) onEndCallback();
-      return;
-    }
-
-    try {
-      const voices = window.speechSynthesis.getVoices();
-      // Tìm giọng Nữ miền Nam có sẵn trên trình duyệt (Microsoft HoaiMy trên Edge hoặc tương đương)
-      const southernFemaleVoice = voices.find(v => 
-        (v.lang.startsWith('vi') || v.lang.includes('VIE')) && 
-        (v.name.toLowerCase().includes('hoaimy') || 
-         v.name.toLowerCase().includes('linh') || 
-         v.name.toLowerCase().includes('mai') ||
-         v.name.toLowerCase().includes('nu') ||
-         v.name.toLowerCase().includes('female'))
-      );
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'vi-VN';
-      utterance.volume = 1.0;
-      utterance.rate = 0.92;
-
-      if (southernFemaleVoice) {
-        utterance.voice = southernFemaleVoice;
-        utterance.pitch = 1.05;
-      } else {
-        const viVoice = voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VIE'));
-        if (viVoice) utterance.voice = viVoice;
-        utterance.pitch = 1.35; // Nâng cao độ cho mềm mại nữ tính
-      }
-
-      let called = false;
-      const finish = () => {
-        if (!called) {
-          called = true;
-          if (onEndCallback) onEndCallback();
-        }
-      };
-
-      utterance.onend = finish;
-      utterance.onerror = finish;
-      setTimeout(finish, Math.max(2500, text.length * 120));
-
-      window.speechSynthesis.speak(utterance);
-    } catch (err) {
-      if (onEndCallback) onEndCallback();
     }
   }
 }

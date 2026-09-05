@@ -330,7 +330,8 @@ class App {
 
     this.currentQuestion = this.currentZone.generator();
 
-    mascot.say(this.currentQuestion.promptText, true);
+    // Hiển thị câu hỏi trên bóng thoại bạn Pip (không tự động đọc đè, bé có thể bấm loa để nghe)
+    mascot.say(this.currentQuestion.promptText, false);
 
     contentArea.innerHTML = `
       <div class="game-view">
@@ -382,6 +383,9 @@ class App {
   handleAnswer(isCorrect, btnEl) {
     if (this.answeringLocked) return;
 
+    // Ngắt ngay lập tức mọi âm thanh giọng đọc trước đó (chống xen lấn 100%)
+    sounds.stopVoice();
+
     if (isCorrect) {
       this.answeringLocked = true;
       sounds.playCorrect();
@@ -397,7 +401,7 @@ class App {
           } else {
             this.loadQuestion();
           }
-        }, 400);
+        }, 300);
       });
 
       // Temporary floating praise badge on stage
@@ -422,6 +426,7 @@ class App {
   }
 
   completeRound() {
+    sounds.stopVoice();
     sounds.playFanfare();
     fireConfetti(); // Triggers fireworks, sparkling flowers and explosion audio
 
