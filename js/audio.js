@@ -231,7 +231,7 @@ class SoundManager {
     });
   }
 
-  // Text-To-Speech Read-Aloud Helper - Giọng Nữ Miền Nam Việt Nam đọc to, đầy đủ, ngọt ngào
+  // Text-To-Speech Read-Aloud Helper - Giọng Nữ Miền Nam Việt Nam (Cô Hoài My)
   speak(text, onEndCallback = null) {
     if (!this.speechEnabled) {
       if (onEndCallback) onEndCallback();
@@ -249,82 +249,86 @@ class SoundManager {
       window.speechSynthesis.cancel();
     }
 
-    // 1. Kiểm tra nếu trình duyệt có sẵn giọng Nữ miền Nam chuẩn như Microsoft Hoài My (Edge)
-    const voices = ('speechSynthesis' in window) ? window.speechSynthesis.getVoices() : [];
-    const hoaiMyVoice = voices.find(v => 
-      (v.lang.startsWith('vi') || v.lang.includes('VIE')) && 
-      (v.name.toLowerCase().includes('hoaimy') || 
-       v.name.toLowerCase().includes('linh') || 
-       v.name.toLowerCase().includes('mai'))
-    );
+    // Làm sạch chuỗi: loại bỏ icon/emoji và ký tự markdown để giọng đọc tự nhiên, êm dịu
+    const cleanText = text
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B50}]/gu, '')
+      .replace(/[\{\}\[\]\*\#]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
 
-    if (hoaiMyVoice) {
-      this.speakViaSynthesis(text, hoaiMyVoice, onEndCallback);
+    if (!cleanText) {
+      if (onEndCallback) onEndCallback();
       return;
     }
 
-    // 2. Mặc định sử dụng Giọng Nữ Tự Nhiên (Online Natural Vietnamese Female Voice) - trong trẻo, ngọt ngào
-    this.speakViaOnlineFemaleTTS(text, onEndCallback);
-  }
+    // 1. Ưu tiên cao nhất: Giọng Nữ Miền Nam Hoài My từ endpoint /api/tts
+    const ttsUrl = `/api/tts?text=${encodeURIComponent(cleanText)}`;
+    const audio = new Audio(ttsUrl);
+    this.currentAudio = audio;
+    audio.volume = 1.0;
+    audio.playbackRate = 0.98;
 
-  speakViaOnlineFemaleTTS(text, onEndCallback = null) {
-    try {
-      const encoded = encodeURIComponent(text);
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encoded}`;
-      const audio = new Audio(url);
-      this.currentAudio = audio;
-      audio.volume = 1.0;
-      audio.playbackRate = 0.95;
-
-      let called = false;
-      const finish = () => {
-        if (!called) {
-          called = true;
-          this.currentAudio = null;
-          if (onEndCallback) onEndCallback();
-        }
-      };
-
-      audio.onended = finish;
-      audio.onerror = () => {
-        // Dự phòng bằng SpeechSynthesis nếu ngoại tuyến
-        this.speakViaSynthesis(text, null, onEndCallback);
-      };
-
-      // Timeout dự phòng
-      const fallbackTime = Math.max(2200, text.length * 115);
-      setTimeout(finish, fallbackTime);
-
-      const promise = audio.play();
-      if (promise !== undefined) {
-        promise.catch(() => {
-          this.speakViaSynthesis(text, null, onEndCallback);
-        });
+    let finished = false;
+    const finish = () => {
+      if (!finished) {
+        finished = true;
+        this.currentAudio = null;
+        if (onEndCallback) onEndCallback();
       }
-    } catch (e) {
-      this.speakViaSynthesis(text, null, onEndCallback);
+    };
+
+    audio.onended = finish;
+
+    // Timeout dự phòng tính theo độ dài câu
+    const timeout = Math.max(2500, cleanText.length * 130);
+    const fallbackTimer = setTimeout(finish, timeout);
+
+    audio.onerror = () => {
+      clearTimeout(fallbackTimer);
+      console.warn('Endpoint /api/tts không khả dụng, chuyển sang giọng dự phòng trình duyệt');
+      this.speakViaBrowserFallback(cleanText, onEndCallback);
+    };
+
+    const promise = audio.play();
+    if (promise !== undefined) {
+      promise.catch(() => {
+        clearTimeout(fallbackTimer);
+        this.speakViaBrowserFallback(cleanText, onEndCallback);
+      });
     }
   }
 
-  speakViaSynthesis(text, voice = null, onEndCallback = null) {
+  // Dự phòng khi chạy offline hoàn toàn không qua server python
+  speakViaBrowserFallback(text, onEndCallback = null) {
     if (!('speechSynthesis' in window)) {
       if (onEndCallback) onEndCallback();
       return;
     }
 
     try {
+      const voices = window.speechSynthesis.getVoices();
+      // Tìm giọng Nữ miền Nam có sẵn trên trình duyệt (Microsoft HoaiMy trên Edge hoặc tương đương)
+      const southernFemaleVoice = voices.find(v => 
+        (v.lang.startsWith('vi') || v.lang.includes('VIE')) && 
+        (v.name.toLowerCase().includes('hoaimy') || 
+         v.name.toLowerCase().includes('linh') || 
+         v.name.toLowerCase().includes('mai') ||
+         v.name.toLowerCase().includes('nu') ||
+         v.name.toLowerCase().includes('female'))
+      );
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'vi-VN';
       utterance.volume = 1.0;
       utterance.rate = 0.92;
-      utterance.pitch = voice ? 1.15 : 1.45; // Nếu là giọng máy mặc định thì đẩy cao độ nữ tính
 
-      if (voice) {
-        utterance.voice = voice;
+      if (southernFemaleVoice) {
+        utterance.voice = southernFemaleVoice;
+        utterance.pitch = 1.05;
       } else {
-        const voices = window.speechSynthesis.getVoices();
         const viVoice = voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VIE'));
         if (viVoice) utterance.voice = viVoice;
+        utterance.pitch = 1.35; // Nâng cao độ cho mềm mại nữ tính
       }
 
       let called = false;
@@ -337,8 +341,7 @@ class SoundManager {
 
       utterance.onend = finish;
       utterance.onerror = finish;
-      const fallbackTime = Math.max(2200, text.length * 115);
-      setTimeout(finish, fallbackTime);
+      setTimeout(finish, Math.max(2500, text.length * 120));
 
       window.speechSynthesis.speak(utterance);
     } catch (err) {
