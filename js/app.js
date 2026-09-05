@@ -325,6 +325,8 @@ class App {
 
   loadQuestion() {
     this.answeringLocked = false;
+    this.questionStartTime = Date.now();
+    this.attemptNumber = 1;
     const contentArea = document.getElementById('main-content');
     if (!contentArea || !this.currentZone) return;
 
@@ -391,8 +393,19 @@ class App {
       sounds.playCorrect();
       btnEl.classList.add('correct');
 
-      // Mascot says and reads personalized praise out loud in Southern female voice completely!
-      mascot.sayRandom('correct', true, () => {
+      const responseTimeMs = Date.now() - (this.questionStartTime || Date.now());
+      this.streak = (this.streak || 0) + 1;
+
+      // Khen ngợi thông minh theo ngữ cảnh hành vi của bé (nhanh, kiên trì, tư duy, xuất sắc)
+      mascot.sayPraise({
+        name: store.getPlayerName(),
+        correct: true,
+        responseTimeMs: responseTimeMs,
+        attemptNumber: this.attemptNumber || 1,
+        streak: this.streak,
+        zoneId: this.currentZone ? this.currentZone.id : 'counting',
+        difficulty: this.currentQuestion.difficulty || 'medium'
+      }, true, () => {
         // Speech is completely finished!
         setTimeout(() => {
           this.questionIndex++;
@@ -401,7 +414,7 @@ class App {
           } else {
             this.loadQuestion();
           }
-        }, 300);
+        }, 250);
       });
 
       // Temporary floating praise badge on stage
@@ -416,9 +429,11 @@ class App {
         }, 2200);
       }
     } else {
+      this.attemptNumber = (this.attemptNumber || 1) + 1;
+      this.streak = 0;
       sounds.playWrong();
       btnEl.classList.add('wrong');
-      mascot.sayRandom('tryAgain', true);
+      mascot.sayRandom('EFFORT', true);
       setTimeout(() => {
         btnEl.classList.remove('wrong');
       }, 600);
