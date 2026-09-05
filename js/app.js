@@ -11,22 +11,53 @@ import { generateBondsQuestion, renderBondsStage } from './games/bonds.js';
 import { generateCompareQuestion, renderCompareStage } from './games/compare.js';
 import { generateShapesQuestion, renderShapesStage } from './games/shapes.js';
 import { generateClockQuestion, renderClockStage } from './games/clock.js';
+import { generateMeasurementQuestion, renderMeasurementStage } from './games/measurement.js';
+import { generateWordProblemQuestion, renderWordProblemStage } from './games/wordproblems.js';
+import { generateSpatialQuestion, renderSpatialStage } from './games/spatial.js';
+import { generateTensQuestion, renderTensStage } from './games/tens.js';
 
 const TOTAL_QUESTIONS_PER_ROUND = 5;
 
 const ZONES = {
   counting: {
     id: 'counting',
-    name: 'Đếm Số & Khung 10 Ô',
+    name: 'Các Số 0–10 & Khung 10 Ô',
     icon: '⭐️',
     desc: 'Đếm đồ vật đáng yêu & làm quen khung 10 ô nhé!',
     colorClass: 'card-counting',
     generator: generateCountingQuestion,
     renderer: renderCountingStage
   },
+  compare: {
+    id: 'compare',
+    name: 'Nhiều Hơn, Ít Hơn & So Sánh Số',
+    icon: '🐊',
+    desc: 'Giúp bạn cá sấu ngoạm số lớn hơn: >, =, < !',
+    colorClass: 'card-compare',
+    generator: generateCompareQuestion,
+    renderer: renderCompareStage
+  },
+  bonds: {
+    id: 'bonds',
+    name: 'Sơ Đồ Tách - Gộp (Mấy và Mấy)',
+    icon: '🧩',
+    desc: 'Điền số còn thiếu vào sơ đồ tròn như thám tử!',
+    colorClass: 'card-bonds',
+    generator: generateBondsQuestion,
+    renderer: renderBondsStage
+  },
+  shapes: {
+    id: 'shapes',
+    name: 'Hình Phẳng & Xếp Hình',
+    icon: '🔷',
+    desc: 'Hình vuông, tròn, tam giác, chữ nhật & toa tàu quy luật!',
+    colorClass: 'card-shapes',
+    generator: generateShapesQuestion,
+    renderer: renderShapesStage
+  },
   addition: {
     id: 'addition',
-    name: 'Thám Hiểm Phép Cộng',
+    name: 'Phép Cộng Trong Phạm Vi 10',
     icon: '➕',
     desc: 'Cùng chú ếch nhảy tia số & gộp các nhóm lại!',
     colorClass: 'card-addition',
@@ -35,48 +66,57 @@ const ZONES = {
   },
   subtraction: {
     id: 'subtraction',
-    name: 'Thử Thách Phép Trừ',
+    name: 'Phép Trừ Trong Phạm Vi 10',
     icon: '➖',
     desc: 'Bấm nổ bóng bay & đếm số lượng còn lại!',
     colorClass: 'card-subtraction',
     generator: generateSubtractionQuestion,
     renderer: renderSubtractionStage
   },
-  bonds: {
-    id: 'bonds',
-    name: 'Sơ Đồ Tách - Gộp Số',
-    icon: '🧩',
-    desc: 'Điền số còn thiếu vào sơ đồ tròn như thám tử!',
-    colorClass: 'card-bonds',
-    generator: generateBondsQuestion,
-    renderer: renderBondsStage
+  spatial: {
+    id: 'spatial',
+    name: 'Khối Lập Phương & Vị Trí Không Gian',
+    icon: '📦',
+    desc: 'Khối lập phương, khối hộp chữ nhật & Trên/Dưới, Trái/Phải!',
+    colorClass: 'card-spatial',
+    generator: generateSpatialQuestion,
+    renderer: renderSpatialStage
   },
-  compare: {
-    id: 'compare',
-    name: 'Cá Sấu Háu Ăn',
-    icon: '🐊',
-    desc: 'Giúp bạn cá sấu ngoạm số lớn hơn: >, =, < !',
-    colorClass: 'card-compare',
-    generator: generateCompareQuestion,
-    renderer: renderCompareStage
+  tens: {
+    id: 'tens',
+    name: 'Số Có Hai Chữ Số & Số Tròn Chục',
+    icon: '🔢',
+    desc: 'Làm quen 1 chục = 10, các số từ 11 đến 20 & số tròn chục!',
+    colorClass: 'card-tens',
+    generator: generateTensQuestion,
+    renderer: renderTensStage
   },
-  shapes: {
-    id: 'shapes',
-    name: 'Hình Học & Quy Luật',
-    icon: '🔷',
-    desc: 'Lên chuyến tàu quy luật & phân biệt các hình học!',
-    colorClass: 'card-shapes',
-    generator: generateShapesQuestion,
-    renderer: renderShapesStage
+  measurement: {
+    id: 'measurement',
+    name: 'Dài Hơn - Ngắn Hơn & Đo cm',
+    icon: '📏',
+    desc: 'So sánh chiều dài & dùng thước đo xăng-ti-mét!',
+    colorClass: 'card-measurement',
+    generator: generateMeasurementQuestion,
+    renderer: renderMeasurementStage
   },
   clock: {
     id: 'clock',
-    name: 'Bé Xem Đồng Hồ',
+    name: 'Đồng Hồ & Thời Gian Trong Ngày',
     icon: '⏰',
-    desc: 'Tập xem kim giờ và kim phút lúc đúng giờ & giờ rưỡi!',
+    desc: 'Xem giờ đúng, giờ rưỡi & các buổi sáng, trưa, chiều, tối!',
     colorClass: 'card-clock',
     generator: generateClockQuestion,
     renderer: renderClockStage
+  },
+  wordproblems: {
+    id: 'wordproblems',
+    name: 'Giải Toán Có Lời Văn',
+    icon: '📖',
+    desc: 'Đố vui bài toán thực tế kèm hình ảnh sinh động!',
+    colorClass: 'card-wordproblems',
+    generator: generateWordProblemQuestion,
+    renderer: renderWordProblemStage
   }
 };
 
@@ -347,8 +387,18 @@ class App {
       sounds.playCorrect();
       btnEl.classList.add('correct');
 
-      // Mascot says and reads personalized praise out loud in Southern female voice!
-      mascot.sayRandom('correct', true);
+      // Mascot says and reads personalized praise out loud in Southern female voice completely!
+      mascot.sayRandom('correct', true, () => {
+        // Speech is completely finished!
+        setTimeout(() => {
+          this.questionIndex++;
+          if (this.questionIndex >= TOTAL_QUESTIONS_PER_ROUND) {
+            this.completeRound();
+          } else {
+            this.loadQuestion();
+          }
+        }, 400);
+      });
 
       // Temporary floating praise badge on stage
       const stageEl = document.getElementById('manipulative-stage');
@@ -359,17 +409,8 @@ class App {
         stageEl.appendChild(praiseEl);
         setTimeout(() => {
           if (praiseEl.parentNode) praiseEl.parentNode.removeChild(praiseEl);
-        }, 1200);
+        }, 2200);
       }
-
-      setTimeout(() => {
-        this.questionIndex++;
-        if (this.questionIndex >= TOTAL_QUESTIONS_PER_ROUND) {
-          this.completeRound();
-        } else {
-          this.loadQuestion();
-        }
-      }, 1200);
     } else {
       sounds.playWrong();
       btnEl.classList.add('wrong');

@@ -422,6 +422,34 @@
   background: var(--accent-pink);
 }
 
+.zone-card.card-measurement {
+  border-color: #99f6e4;
+}
+.zone-card.card-measurement::after {
+  background: #14b8a6;
+}
+
+.zone-card.card-wordproblems {
+  border-color: #fed7aa;
+}
+.zone-card.card-wordproblems::after {
+  background: #f97316;
+}
+
+.zone-card.card-spatial {
+  border-color: #c7d2fe;
+}
+.zone-card.card-spatial::after {
+  background: #6366f1;
+}
+
+.zone-card.card-tens {
+  border-color: #fef08a;
+}
+.zone-card.card-tens::after {
+  background: #ca8a04;
+}
+
 .zone-icon-box {
   width: 80px;
   height: 80px;

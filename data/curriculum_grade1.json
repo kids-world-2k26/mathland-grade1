@@ -1,0 +1,77 @@
+{
+  "curriculum": "Toán Lớp 1 - Bộ Sách Kết Nối Tri Thức Với Cuộc Sống (Tập 1 & Tập 2)",
+  "publisher": "Nhà Xuất Bản Giáo Dục Việt Nam",
+  "source_files": [
+    "data/Toán lớp 1 tập 1 kết nối tri thức với cuộc sống.pdf",
+    "data/Toán lớp 1 tập 2 kết nối tri thức cuộc sống.pdf"
+  ],
+  "tap_1": {
+    "chu_de_1": {
+      "title": "Các số từ 0 đến 10",
+      "lessons": [
+        "Bài 1: Các số 0, 1, 2, 3, 4, 5",
+        "Bài 2: Các số 6, 7, 8, 9, 10",
+        "Bài 3: Nhiều hơn, ít hơn, bằng nhau",
+        "Bài 4: So sánh số (dấu >, <, =)",
+        "Bài 5: Mấy và mấy (Sơ đồ tách - gộp số)"
+      ]
+    },
+    "chu_de_2": {
+      "title": "Làm quen với một số hình phẳng",
+      "lessons": [
+        "Bài 7: Hình vuông, hình tròn, hình tam giác, hình chữ nhật",
+        "Bài 8: Thực hành lắp ghép, xếp hình"
+      ]
+    },
+    "chu_de_3": {
+      "title": "Phép cộng, phép trừ trong phạm vi 10",
+      "lessons": [
+        "Bài 10: Phép cộng trong phạm vi 10",
+        "Bài 11: Phép trừ trong phạm vi 10",
+        "Bài 12: Bảng cộng, bảng trừ trong phạm vi 10"
+      ]
+    },
+    "chu_de_4": {
+      "title": "Làm quen với một số hình khối và vị trí",
+      "lessons": [
+        "Bài 14: Khối lập phương, khối hộp chữ nhật",
+        "Bài 15: Vị trí, định hướng trong không gian (Trên/Dưới, Trước/Sau, Trái/Phải)"
+      ]
+    },
+    "chu_de_5": {
+      "title": "Ôn tập học kì 1"
+    }
+  },
+  "tap_2": {
+    "chu_de_6": {
+      "title": "Các số đến 100",
+      "lessons": [
+        "Bài 21: Số có hai chữ số (Các số đến 20: 1 chục = 10)",
+        "Bài 22: Số tròn chục (10, 20, 30, ..., 90, 100)",
+        "Bài 23: Bảng các số từ 1 đến 100"
+      ]
+    },
+    "chu_de_7": {
+      "title": "Độ dài và đo độ dài",
+      "lessons": [
+        "Bài 24: Dài hơn, ngắn hơn",
+        "Bài 25: Cao hơn, thấp hơn",
+        "Bài 26: Đơn vị đo độ dài Xăng-ti-mét (cm)"
+      ]
+    },
+    "chu_de_8": {
+      "title": "Phép cộng, phép trừ (không nhớ) trong phạm vi 100"
+    },
+    "chu_de_9": {
+      "title": "Thời gian và giờ giấc",
+      "lessons": [
+        "Bài 28: Đồng hồ, xem giờ đúng (:00) và giờ rưỡi (:30)",
+        "Bài 29: Các buổi trong ngày: Buổi sáng, buổi trưa, buổi chiều, buổi tối",
+        "Bài 30: Xem lịch (Các ngày trong tuần)"
+      ]
+    },
+    "chu_de_10": {
+      "title": "Ôn tập cuối năm"
+    }
+  }
+}

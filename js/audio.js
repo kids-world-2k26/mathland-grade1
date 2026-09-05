@@ -231,34 +231,57 @@ class SoundManager {
     });
   }
 
-  // Text-To-Speech Read-Aloud Helper - Giọng Nữ Miền Nam Việt Nam
-  speak(text) {
-    if (!this.speechEnabled || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel(); // Stop any pending speech
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'vi-VN';
-    
-    // Tinh chỉnh giọng nữ ngọt ngào, ấm áp, tốc độ vừa phải cho bé miền Nam
-    utterance.rate = 0.93; // Tốc độ hơi chậm, rõ ràng cho bé lớp 1
-    utterance.pitch = 1.25; // Cao độ thanh thoát, nữ tính, ngọt ngào
-
-    // Tìm kiếm giọng nữ tiếng Việt (ưu tiên giọng Nam/giọng Nữ miền Nam như HoaiMy, Linh, Mai, Google Tiếng Việt)
-    const voices = window.speechSynthesis.getVoices();
-    const southernFemaleVoice = voices.find(v => 
-      (v.lang.startsWith('vi') || v.lang.includes('VIE')) && 
-      (v.name.toLowerCase().includes('hoaimy') || 
-       v.name.toLowerCase().includes('linh') || 
-       v.name.toLowerCase().includes('mai') || 
-       v.name.toLowerCase().includes('female') ||
-       v.name.toLowerCase().includes('google'))
-    ) || voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VIE'));
-
-    if (southernFemaleVoice) {
-      utterance.voice = southernFemaleVoice;
+  // Text-To-Speech Read-Aloud Helper - Giọng Nữ Miền Nam Việt Nam đọc to, đầy đủ
+  speak(text, onEndCallback = null) {
+    if (!this.speechEnabled || !('speechSynthesis' in window)) {
+      if (onEndCallback) onEndCallback();
+      return;
     }
 
-    window.speechSynthesis.speak(utterance);
+    try {
+      window.speechSynthesis.cancel(); // Dừng câu trước nếu có
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'vi-VN';
+      utterance.volume = 1.0; // Đọc to rõ ràng tối đa
+      utterance.rate = 0.92;   // Tốc độ vừa phải, tròn vành rõ chữ
+      utterance.pitch = 1.25;  // Cao độ trong trẻo, ngọt ngào của giọng nữ miền Nam
+
+      // Tìm giọng nữ miền Nam Việt Nam (HoaiMy, Linh, Mai, Google Tiếng Việt...)
+      const voices = window.speechSynthesis.getVoices();
+      const southernFemaleVoice = voices.find(v => 
+        (v.lang.startsWith('vi') || v.lang.includes('VIE')) && 
+        (v.name.toLowerCase().includes('hoaimy') || 
+         v.name.toLowerCase().includes('linh') || 
+         v.name.toLowerCase().includes('mai') || 
+         v.name.toLowerCase().includes('female') ||
+         v.name.toLowerCase().includes('google'))
+      ) || voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VIE'));
+
+      if (southernFemaleVoice) {
+        utterance.voice = southernFemaleVoice;
+      }
+
+      let callbackFired = false;
+      const fireEnd = () => {
+        if (!callbackFired) {
+          callbackFired = true;
+          if (onEndCallback) onEndCallback();
+        }
+      };
+
+      utterance.onend = fireEnd;
+      utterance.onerror = fireEnd;
+
+      // Timeout dự phòng trong trường hợp trình duyệt không kích hoạt onend
+      const fallbackTime = Math.max(1800, text.length * 110);
+      setTimeout(fireEnd, fallbackTime);
+
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.warn('Speech synthesis error', err);
+      if (onEndCallback) onEndCallback();
+    }
   }
 }
 
