@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vương Quốc Toán Học Lớp 1 - Bé Học Toán Vui Nhộn</title>
+  <meta name="description" content="Ứng dụng học Toán Lớp 1 sinh động và thú vị dành cho các bé: Đếm số, Khung 10 ô, Phép cộng trên tia số, Phép trừ bóng bay, Sơ đồ tách gộp số, Hình học và Xem đồng hồ.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/games.css">
+</head>
+<body>
+  <!-- Whimsical floating clouds background -->
+  <div class="bg-decorations" aria-hidden="true">
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+  </div>
+
+  <div id="app">
+    <!-- Main App Header -->
+    <header class="app-header">
+      <div id="brand-btn" class="brand" role="button" tabindex="0" title="Về trang chủ thử thách">
+        <div class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Vương Quốc Toán <span>Lớp 1</span></h1>
+        </div>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-badge stars" title="Số sao tích lũy của bé">
+          <span>⭐️</span>
+          <span id="header-stars-count">0</span>
+        </div>
+
+        <button id="stickers-modal-btn" class="stat-badge stickers-btn" title="Xem bộ sưu tập nhãn dán">
+          <span>🎁</span>
+          <span id="header-stickers-count">0 Nhãn dán</span>
+        </button>
+      </div>
+
+      <div class="header-actions">
+        <button id="sound-toggle-btn" class="icon-btn active" title="Bật/Tắt âm thanh" aria-label="Bật hoặc tắt âm thanh">🔊</button>
+        <button id="speech-toggle-btn" class="icon-btn active" title="Bật/Tắt giọng đọc" aria-label="Bật hoặc tắt giọng đọc">🗣️</button>
+      </div>
+    </header>
+
+    <!-- Mascot Buddy Pip Banner -->
+    <section class="mascot-banner" aria-label="Bạn đồng hành">
+      <div id="mascot-avatar" class="mascot-avatar" title="Bấm vào bạn Pip để nghe điều thú vị!">
+        <svg width="56" height="56" viewBox="0 0 100 100">
+          <!-- Cute Owl Mascot SVG -->
+          <ellipse cx="50" cy="55" rx="36" ry="38" fill="#f59e0b" />
+          <ellipse cx="50" cy="62" rx="26" ry="24" fill="#fef08a" />
+          <!-- Owl Eyes -->
+          <circle cx="37" cy="44" r="14" fill="#ffffff" />
+          <circle cx="63" cy="44" r="14" fill="#ffffff" />
+          <circle cx="39" cy="44" r="7" fill="#1e293b" />
+          <circle cx="61" cy="44" r="7" fill="#1e293b" />
+          <circle cx="41" cy="42" r="3" fill="#ffffff" />
+          <circle cx="63" cy="42" r="3" fill="#ffffff" />
+          <!-- Beak -->
+          <polygon points="50,48 45,56 55,56" fill="#ea580c" />
+          <!-- Owl Ears / Tuft -->
+          <polygon points="26,24 38,34 22,40" fill="#d97706" />
+          <polygon points="74,24 62,34 78,40" fill="#d97706" />
+        </svg>
+      </div>
+      <div class="mascot-dialog">
+        <div class="mascot-name">
+          <span>🦉 Cú Vàng Pip - Bạn Học Toán</span>
+        </div>
+        <div class="mascot-bubble">
+          <span id="mascot-text">Đang chuẩn bị bài học...</span>
+          <button id="mascot-speak-btn" class="speak-btn" title="Nghe bạn Pip đọc">🔊</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dynamic Main Content (Hub or Game Arena) -->
+    <main id="main-content" role="main"></main>
+  </div>
+
+  <!-- Sticker Album Modal -->
+  <div id="sticker-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sticker-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="sticker-modal-title" class="modal-title">
+          <span>🏆</span> Bộ Sưu Tập Nhãn Dán Của Bé
+        </h2>
+        <button id="sticker-modal-close" class="modal-close" aria-label="Đóng cửa sổ">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 16px; font-weight: 600; color: #64748b;">
+          Bé hãy vượt qua các thử thách và tích lũy ngôi sao để mở khóa cả 12 nhãn dán xinh xắn nhé!
+        </p>
+        <div id="sticker-album-grid" class="sticker-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Round Complete Victory Modal -->
+  <div id="win-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="win-modal-title">
+    <div class="modal-card" style="max-width: 440px; text-align: center;">
+      <div class="modal-body round-complete-dialog">
+        <div class="trophy-icon">🏆</div>
+        <h2 id="win-modal-title" style="font-size: 2rem; color: #15803d; margin: 12px 0 6px;">Xuất Sắc Hoàn Thành!</h2>
+        <p style="font-size: 1.15rem; font-weight: 600; color: #475569;">Bé đã trả lời đúng tất cả các câu hỏi rồi!</p>
+        <div id="win-stars-msg" style="font-family: var(--font-heading); font-size: 1.6rem; color: #b45309; margin: 16px 0;">
+          +3 Ngôi Sao Lấp Lánh!
+        </div>
+        <button id="win-continue-btn" class="btn btn-coral" style="font-size: 1.3rem; width: 100%;">
+          <span>🌟</span> <span>Tiếp Tục Khám Phá!</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- App Core Module -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
