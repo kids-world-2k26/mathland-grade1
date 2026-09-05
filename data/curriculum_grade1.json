@@ -1,77 +1,134 @@
 {
   "curriculum": "Toán Lớp 1 - Bộ Sách Kết Nối Tri Thức Với Cuộc Sống (Tập 1 & Tập 2)",
   "publisher": "Nhà Xuất Bản Giáo Dục Việt Nam",
+  "edition": "Tái bản lần thứ sáu",
+  "authors": {
+    "editor_in_chief": "Hà Huy Khoái",
+    "lead_author": "Lê Anh Vinh",
+    "authors": ["Nguyễn Áng", "Vũ Văn Dương", "Nguyễn Minh Hải", "Bùi Bá Mạnh"]
+  },
   "source_files": [
-    "data/Toán lớp 1 tập 1 kết nối tri thức với cuộc sống.pdf",
-    "data/Toán lớp 1 tập 2 kết nối tri thức cuộc sống.pdf"
+    "data/Toan 1 - Tap 1.pdf",
+    "data/Toan 1 - Tap 2.pdf"
   ],
   "tap_1": {
+    "title": "Toán 1 - Tập Một (Học kì 1)",
+    "pages": 118,
     "chu_de_1": {
-      "title": "Các số từ 0 đến 10",
+      "id": "chu_de_1",
+      "title": "Chủ đề 1: Các số từ 0 đến 10",
+      "page_start": 6,
       "lessons": [
-        "Bài 1: Các số 0, 1, 2, 3, 4, 5",
-        "Bài 2: Các số 6, 7, 8, 9, 10",
-        "Bài 3: Nhiều hơn, ít hơn, bằng nhau",
-        "Bài 4: So sánh số (dấu >, <, =)",
-        "Bài 5: Mấy và mấy (Sơ đồ tách - gộp số)"
+        { "id": 0, "title": "Tiết học đầu tiên", "page": 6 },
+        { "id": 1, "title": "Bài 1. Các số 0, 1, 2, 3, 4, 5", "page": 8, "zone": "counting" },
+        { "id": 2, "title": "Bài 2. Các số 6, 7, 8, 9, 10", "page": 14, "zone": "counting" },
+        { "id": 3, "title": "Bài 3. Nhiều hơn, ít hơn, bằng nhau", "page": 20, "zone": "compare" },
+        { "id": 4, "title": "Bài 4. So sánh số (Dấu >, <, =)", "page": 24, "zone": "compare" },
+        { "id": 5, "title": "Bài 5. Mấy và mấy (Sơ đồ tách - gộp số)", "page": 32, "zone": "bonds" },
+        { "id": 6, "title": "Bài 6. Luyện tập chung", "page": 38, "zone": "counting" }
       ]
     },
     "chu_de_2": {
-      "title": "Làm quen với một số hình phẳng",
+      "id": "chu_de_2",
+      "title": "Chủ đề 2: Làm quen với một số hình phẳng",
+      "page_start": 46,
       "lessons": [
-        "Bài 7: Hình vuông, hình tròn, hình tam giác, hình chữ nhật",
-        "Bài 8: Thực hành lắp ghép, xếp hình"
+        { "id": 7, "title": "Bài 7. Hình vuông, hình tròn, hình tam giác, hình chữ nhật", "page": 46, "zone": "shapes" },
+        { "id": 8, "title": "Bài 8. Thực hành lắp ghép, xếp hình", "page": 50, "zone": "shapes" },
+        { "id": 9, "title": "Bài 9. Luyện tập chung", "page": 54, "zone": "shapes" }
       ]
     },
     "chu_de_3": {
-      "title": "Phép cộng, phép trừ trong phạm vi 10",
+      "id": "chu_de_3",
+      "title": "Chủ đề 3: Phép cộng, phép trừ trong phạm vi 10",
+      "page_start": 56,
       "lessons": [
-        "Bài 10: Phép cộng trong phạm vi 10",
-        "Bài 11: Phép trừ trong phạm vi 10",
-        "Bài 12: Bảng cộng, bảng trừ trong phạm vi 10"
+        { "id": 10, "title": "Bài 10. Phép cộng trong phạm vi 10", "page": 56, "zone": "addition" },
+        { "id": 11, "title": "Bài 11. Phép trừ trong phạm vi 10", "page": 68, "zone": "subtraction" },
+        { "id": 12, "title": "Bài 12. Bảng cộng, bảng trừ trong phạm vi 10", "page": 80, "zone": "addition" },
+        { "id": 13, "title": "Bài 13. Luyện tập chung", "page": 86, "zone": "addition" }
       ]
     },
     "chu_de_4": {
-      "title": "Làm quen với một số hình khối và vị trí",
+      "id": "chu_de_4",
+      "title": "Chủ đề 4: Làm quen với một số hình khối",
+      "page_start": 92,
       "lessons": [
-        "Bài 14: Khối lập phương, khối hộp chữ nhật",
-        "Bài 15: Vị trí, định hướng trong không gian (Trên/Dưới, Trước/Sau, Trái/Phải)"
+        { "id": 14, "title": "Bài 14. Khối lập phương, khối hộp chữ nhật", "page": 92, "zone": "spatial" },
+        { "id": 15, "title": "Bài 15. Vị trí, định hướng trong không gian (Trên/Dưới, Trước/Sau, Trái/Phải)", "page": 96, "zone": "spatial" },
+        { "id": 16, "title": "Bài 16. Luyện tập chung", "page": 100, "zone": "spatial" }
       ]
     },
     "chu_de_5": {
-      "title": "Ôn tập học kì 1"
+      "id": "chu_de_5",
+      "title": "Chủ đề 5: Ôn tập học kì 1",
+      "page_start": 102,
+      "lessons": [
+        { "id": 17, "title": "Bài 17. Ôn tập các số trong phạm vi 10", "page": 102, "zone": "counting" },
+        { "id": 18, "title": "Bài 18. Ôn tập phép cộng, phép trừ trong phạm vi 10", "page": 106, "zone": "addition" },
+        { "id": 19, "title": "Bài 19. Ôn tập hình học", "page": 110, "zone": "shapes" },
+        { "id": 20, "title": "Bài 20. Ôn tập chung & Bài toán có lời văn", "page": 112, "zone": "wordproblems" }
+      ]
     }
   },
   "tap_2": {
+    "title": "Toán 1 - Tập Hai (Học kì 2)",
+    "pages": 110,
     "chu_de_6": {
-      "title": "Các số đến 100",
+      "id": "chu_de_6",
+      "title": "Chủ đề 6: Các số đến 100",
+      "page_start": 4,
       "lessons": [
-        "Bài 21: Số có hai chữ số (Các số đến 20: 1 chục = 10)",
-        "Bài 22: Số tròn chục (10, 20, 30, ..., 90, 100)",
-        "Bài 23: Bảng các số từ 1 đến 100"
+        { "id": 21, "title": "Bài 21. Số có hai chữ số (Các số đến 20: 1 chục = 10)", "page": 4, "zone": "tens" },
+        { "id": 22, "title": "Bài 22. So sánh số có hai chữ số", "page": 16, "zone": "tens" },
+        { "id": 23, "title": "Bài 23. Bảng các số từ 1 đến 100", "page": 22, "zone": "tens" },
+        { "id": 24, "title": "Bài 24. Luyện tập chung", "page": 24, "zone": "tens" }
       ]
     },
     "chu_de_7": {
-      "title": "Độ dài và đo độ dài",
+      "id": "chu_de_7",
+      "title": "Chủ đề 7: Độ dài và đo độ dài",
+      "page_start": 28,
       "lessons": [
-        "Bài 24: Dài hơn, ngắn hơn",
-        "Bài 25: Cao hơn, thấp hơn",
-        "Bài 26: Đơn vị đo độ dài Xăng-ti-mét (cm)"
+        { "id": 25, "title": "Bài 25. Dài hơn, ngắn hơn", "page": 28, "zone": "measurement" },
+        { "id": 26, "title": "Bài 26. Đơn vị đo độ dài Xăng-ti-mét (cm)", "page": 32, "zone": "measurement" },
+        { "id": 27, "title": "Bài 27. Thực hành ước lượng và đo độ dài", "page": 36, "zone": "measurement" },
+        { "id": 28, "title": "Bài 28. Luyện tập chung", "page": 40, "zone": "measurement" }
       ]
     },
     "chu_de_8": {
-      "title": "Phép cộng, phép trừ (không nhớ) trong phạm vi 100"
+      "id": "chu_de_8",
+      "title": "Chủ đề 8: Phép cộng, phép trừ (không nhớ) trong phạm vi 100",
+      "page_start": 44,
+      "lessons": [
+        { "id": 29, "title": "Bài 29. Phép cộng số có hai chữ số với số có một chữ số", "page": 44, "zone": "tens" },
+        { "id": 30, "title": "Bài 30. Phép cộng số có hai chữ số với số có hai chữ số", "page": 48, "zone": "tens" },
+        { "id": 31, "title": "Bài 31. Phép trừ số có hai chữ số cho số có một chữ số", "page": 52, "zone": "tens" },
+        { "id": 32, "title": "Bài 32. Phép trừ số có hai chữ số cho số có hai chữ số", "page": 58, "zone": "tens" },
+        { "id": 33, "title": "Bài 33. Luyện tập chung", "page": 64, "zone": "tens" }
+      ]
     },
     "chu_de_9": {
-      "title": "Thời gian và giờ giấc",
+      "id": "chu_de_9",
+      "title": "Chủ đề 9: Thời gian. Giờ và lịch",
+      "page_start": 72,
       "lessons": [
-        "Bài 28: Đồng hồ, xem giờ đúng (:00) và giờ rưỡi (:30)",
-        "Bài 29: Các buổi trong ngày: Buổi sáng, buổi trưa, buổi chiều, buổi tối",
-        "Bài 30: Xem lịch (Các ngày trong tuần)"
+        { "id": 34, "title": "Bài 34. Xem giờ đúng trên đồng hồ", "page": 72, "zone": "clock" },
+        { "id": 35, "title": "Bài 35. Các ngày trong tuần", "page": 76, "zone": "clock" },
+        { "id": 36, "title": "Bài 36. Thực hành xem lịch và giờ", "page": 80, "zone": "clock" },
+        { "id": 37, "title": "Bài 37. Luyện tập chung", "page": 84, "zone": "clock" }
       ]
     },
     "chu_de_10": {
-      "title": "Ôn tập cuối năm"
+      "id": "chu_de_10",
+      "title": "Chủ đề 10: Ôn tập cuối năm",
+      "page_start": 88,
+      "lessons": [
+        { "id": 38, "title": "Bài 38. Ôn tập các số và phép tính trong phạm vi 10", "page": 88, "zone": "addition" },
+        { "id": 39, "title": "Bài 39. Ôn tập các số và phép tính trong phạm vi 100", "page": 94, "zone": "tens" },
+        { "id": 40, "title": "Bài 40. Ôn tập hình học và đo lường", "page": 100, "zone": "shapes" },
+        { "id": 41, "title": "Bài 41. Ôn tập chung & Đấu trường toán học", "page": 104, "zone": "wordproblems" }
+      ]
     }
   }
 }

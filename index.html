@@ -47,6 +47,11 @@
           <span>🎁</span>
           <span id="header-stickers-count">0 Nhãn dán</span>
         </button>
+
+        <button id="curriculum-modal-btn" class="stat-badge curriculum-btn" title="Xem 41 bài học theo SGK Kết Nối Tri Thức" style="background: #e0f2fe; color: #0369a1; border-color: #bae6fd; font-weight: 700; cursor: pointer;">
+          <span>📖</span>
+          <span>SGK (41 Bài)</span>
+        </button>
       </div>
 
       <div class="header-actions">
@@ -90,6 +95,35 @@
 
     <!-- Dynamic Main Content (Hub or Game Arena) -->
     <main id="main-content" role="main"></main>
+  </div>
+
+  <!-- Curriculum SGK Modal -->
+  <div id="curriculum-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="curriculum-modal-title">
+    <div class="modal-card" style="max-width: 840px; max-height: 88vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h2 id="curriculum-modal-title" class="modal-title">
+          <span>📖</span> Khung Chương Trình SGK Toán Lớp 1 Chuẩn
+        </h2>
+        <button id="curriculum-modal-close" class="modal-close" aria-label="Đóng cửa sổ">✕</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; padding: 20px;">
+        <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; font-size: 0.95rem; color: #166534; line-height: 1.5;">
+          <strong>Bộ Sách: Kết Nối Tri Thức Với Cuộc Sống</strong> (NXB Giáo Dục Việt Nam - Tái bản lần thứ sáu).<br>
+          Gồm toàn bộ <strong>41 bài học</strong> thuộc 10 chủ đề xuyên suốt 2 Tập. Nhấn "Luyện tập" để vào làm bài tương ứng!
+        </div>
+
+        <!-- Filter tabs inside curriculum modal -->
+        <div class="curriculum-filter-tabs" style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+          <button id="curr-tab-all" class="btn btn-sm" style="border-radius: 20px; font-weight: 700; background: #6366f1; color: white; border: none; padding: 6px 16px; cursor: pointer;">🌟 Tất cả (41 bài)</button>
+          <button id="curr-tab-tap1" class="btn btn-sm" style="border-radius: 20px; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 16px; cursor: pointer;">📘 Tập 1 (Bài 1–20)</button>
+          <button id="curr-tab-tap2" class="btn btn-sm" style="border-radius: 20px; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 16px; cursor: pointer;">📙 Tập 2 (Bài 21–41)</button>
+        </div>
+
+        <div id="curriculum-tree-container">
+          <!-- Populated from data/curriculum_grade1.json -->
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Sticker Album Modal -->

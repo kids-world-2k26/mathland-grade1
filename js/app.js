@@ -25,6 +25,7 @@ const ZONES = {
     icon: '⭐️',
     desc: 'Đếm đồ vật đáng yêu & làm quen khung 10 ô nhé!',
     colorClass: 'card-counting',
+    semester: 1,
     generator: generateCountingQuestion,
     renderer: renderCountingStage
   },
@@ -34,6 +35,7 @@ const ZONES = {
     icon: '🐊',
     desc: 'Giúp bạn cá sấu ngoạm số lớn hơn: >, =, < !',
     colorClass: 'card-compare',
+    semester: 1,
     generator: generateCompareQuestion,
     renderer: renderCompareStage
   },
@@ -43,6 +45,7 @@ const ZONES = {
     icon: '🧩',
     desc: 'Điền số còn thiếu vào sơ đồ tròn như thám tử!',
     colorClass: 'card-bonds',
+    semester: 1,
     generator: generateBondsQuestion,
     renderer: renderBondsStage
   },
@@ -52,6 +55,7 @@ const ZONES = {
     icon: '🔷',
     desc: 'Hình vuông, tròn, tam giác, chữ nhật & toa tàu quy luật!',
     colorClass: 'card-shapes',
+    semester: 'both',
     generator: generateShapesQuestion,
     renderer: renderShapesStage
   },
@@ -61,6 +65,7 @@ const ZONES = {
     icon: '➕',
     desc: 'Cùng chú ếch nhảy tia số & gộp các nhóm lại!',
     colorClass: 'card-addition',
+    semester: 1,
     generator: generateAdditionQuestion,
     renderer: renderAdditionStage
   },
@@ -70,6 +75,7 @@ const ZONES = {
     icon: '➖',
     desc: 'Bấm nổ bóng bay & đếm số lượng còn lại!',
     colorClass: 'card-subtraction',
+    semester: 1,
     generator: generateSubtractionQuestion,
     renderer: renderSubtractionStage
   },
@@ -79,15 +85,17 @@ const ZONES = {
     icon: '📦',
     desc: 'Khối lập phương, khối hộp chữ nhật & Trên/Dưới, Trái/Phải!',
     colorClass: 'card-spatial',
+    semester: 1,
     generator: generateSpatialQuestion,
     renderer: renderSpatialStage
   },
   tens: {
     id: 'tens',
-    name: 'Số Có Hai Chữ Số & Số Tròn Chục',
+    name: 'Số Có Hai Chữ Số & Phép Tính Đến 100',
     icon: '🔢',
-    desc: 'Làm quen 1 chục = 10, các số từ 11 đến 20 & số tròn chục!',
+    desc: 'Làm quen 1 chục = 10, số đến 100 & phép cộng trừ không nhớ!',
     colorClass: 'card-tens',
+    semester: 2,
     generator: generateTensQuestion,
     renderer: renderTensStage
   },
@@ -97,24 +105,27 @@ const ZONES = {
     icon: '📏',
     desc: 'So sánh chiều dài & dùng thước đo xăng-ti-mét!',
     colorClass: 'card-measurement',
+    semester: 2,
     generator: generateMeasurementQuestion,
     renderer: renderMeasurementStage
   },
   clock: {
     id: 'clock',
-    name: 'Đồng Hồ & Thời Gian Trong Ngày',
+    name: 'Đồng Hồ, Giờ & Các Ngày Trong Tuần',
     icon: '⏰',
-    desc: 'Xem giờ đúng, giờ rưỡi & các buổi sáng, trưa, chiều, tối!',
+    desc: 'Xem giờ đúng, các buổi trong ngày & Thứ Hai đến Chủ Nhật!',
     colorClass: 'card-clock',
+    semester: 2,
     generator: generateClockQuestion,
     renderer: renderClockStage
   },
   wordproblems: {
     id: 'wordproblems',
-    name: 'Giải Toán Có Lời Văn',
+    name: 'Giải Toán Có Lời Văn & Ôn Tổng Hợp',
     icon: '📖',
     desc: 'Đố vui bài toán thực tế kèm hình ảnh sinh động!',
     colorClass: 'card-wordproblems',
+    semester: 'both',
     generator: generateWordProblemQuestion,
     renderer: renderWordProblemStage
   }
@@ -126,6 +137,9 @@ class App {
     this.questionIndex = 0;
     this.currentQuestion = null;
     this.answeringLocked = false;
+    this.semesterFilter = 'all';
+    this.curriculumData = null;
+    this.currModalTab = 'all';
   }
 
   init() {
@@ -237,6 +251,77 @@ class App {
       });
     }
 
+    // Curriculum SGK Modal triggers
+    const currBtn = document.getElementById('curriculum-modal-btn');
+    const currModal = document.getElementById('curriculum-modal');
+    const currCloseBtn = document.getElementById('curriculum-modal-close');
+
+    if (currBtn && currModal) {
+      currBtn.addEventListener('click', () => {
+        sounds.playPop();
+        this.openCurriculumModal(this.currModalTab || 'all');
+      });
+    }
+
+    if (currCloseBtn && currModal) {
+      currCloseBtn.addEventListener('click', () => {
+        sounds.playPop();
+        currModal.classList.remove('open');
+      });
+    }
+
+    // Curriculum internal tabs
+    const tabAll = document.getElementById('curr-tab-all');
+    const tabTap1 = document.getElementById('curr-tab-tap1');
+    const tabTap2 = document.getElementById('curr-tab-tap2');
+
+    const setCurrTabStyle = (activeTab) => {
+      [tabAll, tabTap1, tabTap2].forEach(btn => {
+        if (!btn) return;
+        btn.style.background = '#f1f5f9';
+        btn.style.color = '#475569';
+        btn.style.border = '1px solid #cbd5e1';
+      });
+      if (activeTab === 'all' && tabAll) {
+        tabAll.style.background = '#6366f1';
+        tabAll.style.color = 'white';
+        tabAll.style.border = 'none';
+      } else if (activeTab === 'tap_1' && tabTap1) {
+        tabTap1.style.background = '#0284c7';
+        tabTap1.style.color = 'white';
+        tabTap1.style.border = 'none';
+      } else if (activeTab === 'tap_2' && tabTap2) {
+        tabTap2.style.background = '#ea580c';
+        tabTap2.style.color = 'white';
+        tabTap2.style.border = 'none';
+      }
+    };
+
+    if (tabAll) {
+      tabAll.addEventListener('click', () => {
+        sounds.playPop();
+        this.currModalTab = 'all';
+        setCurrTabStyle('all');
+        this.renderCurriculumTree('all');
+      });
+    }
+    if (tabTap1) {
+      tabTap1.addEventListener('click', () => {
+        sounds.playPop();
+        this.currModalTab = 'tap_1';
+        setCurrTabStyle('tap_1');
+        this.renderCurriculumTree('tap_1');
+      });
+    }
+    if (tabTap2) {
+      tabTap2.addEventListener('click', () => {
+        sounds.playPop();
+        this.currModalTab = 'tap_2';
+        setCurrTabStyle('tap_2');
+        this.renderCurriculumTree('tap_2');
+      });
+    }
+
     // Audio Sound FX Toggle
     const soundToggleBtn = document.getElementById('sound-toggle-btn');
     if (soundToggleBtn) {
@@ -271,6 +356,136 @@ class App {
     }
   }
 
+  async openCurriculumModal(tab = 'all') {
+    const modal = document.getElementById('curriculum-modal');
+    if (!modal) return;
+    this.currModalTab = tab;
+
+    const tabAll = document.getElementById('curr-tab-all');
+    const tabTap1 = document.getElementById('curr-tab-tap1');
+    const tabTap2 = document.getElementById('curr-tab-tap2');
+    [tabAll, tabTap1, tabTap2].forEach(btn => {
+      if (!btn) return;
+      btn.style.background = '#f1f5f9';
+      btn.style.color = '#475569';
+      btn.style.border = '1px solid #cbd5e1';
+    });
+    if (tab === 'all' && tabAll) {
+      tabAll.style.background = '#6366f1';
+      tabAll.style.color = 'white';
+      tabAll.style.border = 'none';
+    } else if (tab === 'tap_1' && tabTap1) {
+      tabTap1.style.background = '#0284c7';
+      tabTap1.style.color = 'white';
+      tabTap1.style.border = 'none';
+    } else if (tab === 'tap_2' && tabTap2) {
+      tabTap2.style.background = '#ea580c';
+      tabTap2.style.color = 'white';
+      tabTap2.style.border = 'none';
+    }
+
+    modal.classList.add('open');
+
+    if (!this.curriculumData) {
+      try {
+        const res = await fetch('data/curriculum_grade1.json');
+        if (res.ok) {
+          this.curriculumData = await res.json();
+        }
+      } catch (err) {
+        console.error('Error fetching curriculum:', err);
+      }
+    }
+
+    this.renderCurriculumTree(tab);
+  }
+
+  renderCurriculumTree(tab = 'all') {
+    const container = document.getElementById('curriculum-tree-container');
+    if (!container) return;
+
+    if (!this.curriculumData) {
+      container.innerHTML = `<div style="text-align: center; padding: 30px; color: #64748b;">Đang tải danh mục 41 bài học SGK...</div>`;
+      return;
+    }
+
+    const data = this.curriculumData;
+    let html = '';
+
+    const renderTap = (tapKey, tapObj, badgeColor, borderColor) => {
+      let tapHtml = `
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 1.25rem; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+            <span style="background: ${badgeColor}; color: white; padding: 4px 12px; border-radius: 14px; font-size: 0.95rem;">${tapObj.title}</span>
+            <span style="font-size: 0.88rem; color: #64748b; font-weight: 500;">(${tapObj.pages} trang)</span>
+          </h3>
+      `;
+
+      Object.entries(tapObj).forEach(([k, theme]) => {
+        if (typeof theme !== 'object' || !theme.lessons) return;
+        tapHtml += `
+          <div class="curr-theme-block" style="border-color: ${borderColor};">
+            <div class="curr-theme-header">
+              <span>${theme.title}</span>
+              <span class="curr-theme-badge">Bắt đầu trang ${theme.page_start}</span>
+            </div>
+            <div class="curr-lessons-list">
+        `;
+
+        theme.lessons.forEach(les => {
+          const zoneObj = les.zone ? ZONES[les.zone] : null;
+          tapHtml += `
+            <div class="curr-lesson-item">
+              <div class="curr-lesson-title">
+                <span style="font-size: 1.3rem;">${zoneObj ? zoneObj.icon : '📝'}</span>
+                <div>
+                  <div style="color: #1e293b;">${les.title}</div>
+                  <div class="curr-lesson-page">Sách giáo khoa trang ${les.page}</div>
+                </div>
+              </div>
+              <div>
+                ${les.zone ? `
+                  <button class="curr-lesson-play-btn" data-zone="${les.zone}">
+                    <span>🚀</span> <span>Luyện tập</span>
+                  </button>
+                ` : `
+                  <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">Lý thuyết SGK</span>
+                `}
+              </div>
+            </div>
+          `;
+        });
+
+        tapHtml += `
+            </div>
+          </div>
+        `;
+      });
+
+      tapHtml += `</div>`;
+      return tapHtml;
+    };
+
+    if (tab === 'all' || tab === 'tap_1') {
+      if (data.tap_1) html += renderTap('tap_1', data.tap_1, '#0284c7', '#bae6fd');
+    }
+    if (tab === 'all' || tab === 'tap_2') {
+      if (data.tap_2) html += renderTap('tap_2', data.tap_2, '#ea580c', '#fed7aa');
+    }
+
+    container.innerHTML = html;
+
+    // Attach click listeners to "Luyện tập" buttons inside modal
+    container.querySelectorAll('.curr-lesson-play-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const zoneId = btn.getAttribute('data-zone');
+        const modal = document.getElementById('curriculum-modal');
+        if (modal) modal.classList.remove('open');
+        this.startZone(zoneId);
+      });
+    });
+  }
+
   renderHub() {
     this.currentZone = null;
     const contentArea = document.getElementById('main-content');
@@ -278,18 +493,55 @@ class App {
 
     mascot.sayRandom('welcome');
 
+    // Filter zones by semester
+    const filteredZones = Object.values(ZONES).filter(zone => {
+      if (this.semesterFilter === '1') {
+        return zone.semester === 1 || zone.semester === 'both';
+      } else if (this.semesterFilter === '2') {
+        return zone.semester === 2 || zone.semester === 'both';
+      }
+      return true; // 'all'
+    });
+
     let html = `
       <div class="hub-view">
-        <div class="section-title-wrap">
-          <h2 class="section-title">✨ Chọn Thử Thách Toán Học Nào!</h2>
+        <div class="hub-controls-bar">
+          <div class="semester-tabs">
+            <button class="semester-tab-btn ${this.semesterFilter === 'all' ? 'active' : ''}" data-filter="all">
+              <span>🌟</span> <span>Tất cả (${Object.keys(ZONES).length} Khu Vực)</span>
+            </button>
+            <button class="semester-tab-btn ${this.semesterFilter === '1' ? 'active' : ''}" data-filter="1">
+              <span>📘</span> <span>Tập 1: Học Kì 1</span>
+            </button>
+            <button class="semester-tab-btn ${this.semesterFilter === '2' ? 'active' : ''}" data-filter="2">
+              <span>📙</span> <span>Tập 2: Học Kì 2</span>
+            </button>
+          </div>
+
+          <button id="hub-sgk-btn" class="btn-open-sgk" title="Xem khung 41 bài SGK Kết Nối Tri Thức">
+            <span>📖</span> <span>Khung SGK Chuẩn (41 Bài)</span>
+          </button>
         </div>
+
+        <div class="section-title-wrap" style="margin-bottom: 20px;">
+          <h2 class="section-title">
+            ${this.semesterFilter === '1' ? '📘 Toán Lớp 1 - Tập 1 (Học Kì 1)' :
+              this.semesterFilter === '2' ? '📙 Toán Lớp 1 - Tập 2 (Học Kì 2)' :
+              '✨ Khám Phá Vương Quốc Toán Lớp 1'}
+          </h2>
+        </div>
+
         <div class="zones-grid">
     `;
 
-    Object.values(ZONES).forEach(zone => {
+    filteredZones.forEach(zone => {
       const plays = store.data.zoneStats[zone.id] || 0;
+      const semBadge = zone.semester === 1 ? '📘 Tập 1' : zone.semester === 2 ? '📙 Tập 2' : '🌟 Cả 2 Tập';
       html += `
         <div class="zone-card ${zone.colorClass}" data-zone-id="${zone.id}">
+          <div style="position: absolute; top: 12px; right: 12px; font-size: 0.75rem; font-weight: 700; background: rgba(255,255,255,0.85); padding: 3px 8px; border-radius: 12px; color: #475569; backdrop-filter: blur(4px);">
+            ${semBadge}
+          </div>
           <div class="zone-icon-box">${zone.icon}</div>
           <h3 class="zone-title">${zone.name}</h3>
           <p class="zone-desc">${zone.desc}</p>
@@ -314,6 +566,24 @@ class App {
         this.startZone(zoneId);
       });
     });
+
+    // Semester filter button listeners
+    contentArea.querySelectorAll('.semester-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sounds.playPop();
+        this.semesterFilter = btn.getAttribute('data-filter');
+        this.renderHub();
+      });
+    });
+
+    // Hub SGK button
+    const hubSgkBtn = document.getElementById('hub-sgk-btn');
+    if (hubSgkBtn) {
+      hubSgkBtn.addEventListener('click', () => {
+        sounds.playPop();
+        this.openCurriculumModal(this.semesterFilter === '1' ? 'tap_1' : this.semesterFilter === '2' ? 'tap_2' : 'all');
+      });
+    }
   }
 
   startZone(zoneId) {

@@ -48,7 +48,7 @@ export function generateTensQuestion() {
       promptText: `Số ${item.num} đọc là gì?`,
       hintText: `Bé đọc phát âm chuẩn tiếng Việt lớp 1 nhé!`
     };
-  } else {
+  } else if (mode === 2) {
     // Số tròn chục (10, 20, 30, ..., 90)
     const bags = Math.floor(Math.random() * 5) + 2; // 2 to 6 bags
     const total = bags * 10;
@@ -70,6 +70,67 @@ export function generateTensQuestion() {
       correctAnswer: total,
       promptText: `Có ${bags} túi cà chua, mỗi túi có 10 quả (1 chục). Có tất cả bao nhiêu quả?`,
       hintText: `Đếm tròn chục: ${bags} chục là ${total} quả cà chua nè!`
+    };
+  } else {
+    // Chủ đề 8: Phép tính không nhớ trong phạm vi 100 (Bài 29 - 32)
+    const isAdd = Math.random() > 0.5;
+    const calcType = Math.floor(Math.random() * 2); // 0: tròn chục, 1: số 2 chữ số + 1 chữ số
+
+    let a, b, answer, promptText;
+    if (calcType === 0) {
+      // Tròn chục
+      if (isAdd) {
+        a = (Math.floor(Math.random() * 4) + 1) * 10; // 10, 20, 30, 40
+        b = (Math.floor(Math.random() * 4) + 1) * 10; // 10, 20, 30, 40
+        answer = a + b;
+        promptText = `${a} + ${b} = ?`;
+      } else {
+        const big = (Math.floor(Math.random() * 6) + 3) * 10; // 30, 40, 50, 60, 70, 80
+        b = (Math.floor(Math.random() * (big / 10 - 1)) + 1) * 10;
+        a = big;
+        answer = a - b;
+        promptText = `${a} - ${b} = ?`;
+      }
+    } else {
+      // 2 chữ số + 1 chữ số hoặc - 1 chữ số
+      const tensPart = (Math.floor(Math.random() * 8) + 1) * 10; // 10, 20, ..., 80
+      if (isAdd) {
+        const onesA = Math.floor(Math.random() * 6); // 0 to 5
+        const onesB = Math.floor(Math.random() * (9 - onesA)) + 1; // ensures no regrouping
+        a = tensPart + onesA;
+        b = onesB;
+        answer = a + b;
+        promptText = `${a} + ${b} = ?`;
+      } else {
+        const onesA = Math.floor(Math.random() * 6) + 3; // 3 to 8
+        const onesB = Math.floor(Math.random() * onesA) + 1;
+        a = tensPart + onesA;
+        b = onesB;
+        answer = a - b;
+        promptText = `${a} - ${b} = ?`;
+      }
+    }
+
+    const choices = [answer];
+    while (choices.length < 3) {
+      const offset = (Math.random() > 0.5 ? 1 : -1) * (calcType === 0 ? 10 : 1);
+      const wrong = answer + offset;
+      if (wrong > 0 && wrong <= 100 && !choices.includes(wrong)) {
+        choices.push(wrong);
+      }
+    }
+    choices.sort(() => Math.random() - 0.5);
+
+    return {
+      mode: 3,
+      a,
+      b,
+      isAdd,
+      choices,
+      correctAnswer: answer,
+      promptText: `Tính: ${promptText}`,
+      displayCalc: promptText,
+      hintText: isAdd ? `Cộng hàng chục với hàng chục, đơn vị với đơn vị nhé!` : `Trừ thẳng hàng đơn vị và giữ nguyên hàng chục nhé!`
     };
   }
 }
@@ -131,7 +192,7 @@ export function renderTensStage(question, onAnswer) {
     numDisplay.style.color = '#b45309';
     numDisplay.textContent = question.num.toString();
     visualBox.appendChild(numDisplay);
-  } else {
+  } else if (question.mode === 2) {
     // Multiple bags of 10
     for (let i = 0; i < question.bags; i++) {
       const bag = document.createElement('div');
@@ -140,6 +201,59 @@ export function renderTensStage(question, onAnswer) {
       bag.innerHTML = '<span>🛍️</span>';
       visualBox.appendChild(bag);
     }
+  } else if (question.mode === 3) {
+    // Calculation display: 2-digit calculations within 100
+    const calcCard = document.createElement('div');
+    calcCard.style.display = 'flex';
+    calcCard.style.alignItems = 'center';
+    calcCard.style.gap = '14px';
+    calcCard.style.fontFamily = 'var(--font-heading)';
+    calcCard.style.fontWeight = '800';
+    calcCard.style.fontSize = '3.2rem';
+    calcCard.style.color = '#1e293b';
+    calcCard.style.flexWrap = 'wrap';
+    calcCard.style.justifyContent = 'center';
+
+    const partA = document.createElement('span');
+    partA.textContent = question.a;
+    partA.style.color = '#0284c7';
+    partA.style.background = '#e0f2fe';
+    partA.style.padding = '6px 18px';
+    partA.style.borderRadius = '16px';
+    partA.style.boxShadow = '0 3px 6px rgba(2, 132, 199, 0.15)';
+
+    const op = document.createElement('span');
+    op.textContent = question.isAdd ? '+' : '−';
+    op.style.color = question.isAdd ? '#16a34a' : '#ea580c';
+    op.style.fontSize = '3rem';
+
+    const partB = document.createElement('span');
+    partB.textContent = question.b;
+    partB.style.color = '#9333ea';
+    partB.style.background = '#f3e8ff';
+    partB.style.padding = '6px 18px';
+    partB.style.borderRadius = '16px';
+    partB.style.boxShadow = '0 3px 6px rgba(147, 51, 234, 0.15)';
+
+    const eq = document.createElement('span');
+    eq.textContent = '=';
+    eq.style.color = '#64748b';
+
+    const qMark = document.createElement('span');
+    qMark.textContent = '?';
+    qMark.style.color = '#d97706';
+    qMark.style.background = '#fef3c7';
+    qMark.style.border = '3px dashed #d97706';
+    qMark.style.padding = '6px 22px';
+    qMark.style.borderRadius = '16px';
+
+    calcCard.appendChild(partA);
+    calcCard.appendChild(op);
+    calcCard.appendChild(partB);
+    calcCard.appendChild(eq);
+    calcCard.appendChild(qMark);
+
+    visualBox.appendChild(calcCard);
   }
 
   container.appendChild(visualBox);
