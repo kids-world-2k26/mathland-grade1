@@ -154,21 +154,108 @@ class SoundManager {
     });
   }
 
-  // Text-To-Speech Read-Aloud Helper
+  // Sound of firework rocket launch & burst
+  playFireworkBurst() {
+    if (this.muted) return;
+    this.initAudioContext();
+    this.resume();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      // 1. Whistle rise
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.21);
+
+      // 2. Boom explosion after rise
+      setTimeout(() => {
+        if (!this.ctx || this.muted) return;
+        const boomTime = this.ctx.currentTime;
+        const noise = this.ctx.createBufferSource();
+        const bufferSize = this.ctx.sampleRate * 0.4;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.08));
+        }
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(450, boomTime);
+        filter.frequency.linearRampToValueAtTime(80, boomTime + 0.35);
+
+        const boomGain = this.ctx.createGain();
+        boomGain.gain.setValueAtTime(0.4, boomTime);
+        boomGain.gain.exponentialRampToValueAtTime(0.01, boomTime + 0.38);
+
+        noise.connect(filter);
+        filter.connect(boomGain);
+        boomGain.connect(this.ctx.destination);
+        noise.start(boomTime);
+      }, 180);
+    } catch (e) {
+      console.warn('Firework audio error', e);
+    }
+  }
+
+  // Sparkling magical chime for flowers & stars
+  playSparkle() {
+    if (this.muted) return;
+    this.initAudioContext();
+    this.resume();
+    if (!this.ctx) return;
+
+    const pitches = [1046.50, 1318.51, 1567.98, 2093.00, 2637.02];
+    const now = this.ctx.currentTime;
+    pitches.forEach((f, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, now + idx * 0.04);
+      gain.gain.setValueAtTime(0.12, now + idx * 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.18);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + idx * 0.04);
+      osc.stop(now + idx * 0.04 + 0.2);
+    });
+  }
+
+  // Text-To-Speech Read-Aloud Helper - Giọng Nữ Miền Nam Việt Nam
   speak(text) {
     if (!this.speechEnabled || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel(); // Stop any pending speech
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'vi-VN';
-    utterance.rate = 0.95; // Slightly slower for young kids
-    utterance.pitch = 1.1; // Cheerful friendly pitch
+    
+    // Tinh chỉnh giọng nữ ngọt ngào, ấm áp, tốc độ vừa phải cho bé miền Nam
+    utterance.rate = 0.93; // Tốc độ hơi chậm, rõ ràng cho bé lớp 1
+    utterance.pitch = 1.25; // Cao độ thanh thoát, nữ tính, ngọt ngào
 
-    // Look for a Vietnamese voice
+    // Tìm kiếm giọng nữ tiếng Việt (ưu tiên giọng Nam/giọng Nữ miền Nam như HoaiMy, Linh, Mai, Google Tiếng Việt)
     const voices = window.speechSynthesis.getVoices();
-    const viVoice = voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VIE'));
-    if (viVoice) {
-      utterance.voice = viVoice;
+    const southernFemaleVoice = voices.find(v => 
+      (v.lang.startsWith('vi') || v.lang.includes('VIE')) && 
+      (v.name.toLowerCase().includes('hoaimy') || 
+       v.name.toLowerCase().includes('linh') || 
+       v.name.toLowerCase().includes('mai') || 
+       v.name.toLowerCase().includes('female') ||
+       v.name.toLowerCase().includes('google'))
+    ) || voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VIE'));
+
+    if (southernFemaleVoice) {
+      utterance.voice = southernFemaleVoice;
     }
 
     window.speechSynthesis.speak(utterance);

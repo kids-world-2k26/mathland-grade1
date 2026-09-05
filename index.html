@@ -32,12 +32,18 @@
       </div>
 
       <div class="header-stats">
+        <button id="player-profile-btn" class="stat-badge player-badge" title="Bấm vào để đổi tên của bé">
+          <span id="header-player-avatar">⭐️</span>
+          <span id="header-player-name">Bé Yêu</span>
+          <span style="font-size: 0.9rem; opacity: 0.7;">✏️</span>
+        </button>
+
         <div class="stat-badge stars" title="Số sao tích lũy của bé">
           <span>⭐️</span>
           <span id="header-stars-count">0</span>
         </div>
 
-        <button id="stickers-modal-btn" class="stat-badge stickers-btn" title="Xem bộ sưu tập nhãn dán">
+        <button id="stickers-modal-btn" class="stat-badge stickers-btn" title="Xem bộ sưu tập nhãn dán" style="background: #ede9fe; color: #6d28d9; border-color: #ddd6fe;">
           <span>🎁</span>
           <span id="header-stickers-count">0 Nhãn dán</span>
         </button>
@@ -103,18 +109,56 @@
     </div>
   </div>
 
+  <!-- Initial Welcome / Name Prompt Modal -->
+  <div id="name-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="name-modal-title">
+    <div class="modal-card" style="max-width: 480px; text-align: center;">
+      <div class="modal-body" style="padding: 30px 24px;">
+        <div style="font-size: 3.5rem; margin-bottom: 8px;">👋🦉</div>
+        <h2 id="name-modal-title" style="font-size: 1.8rem; color: #0f172a; margin-bottom: 8px;">
+          Chào Bạn Nhỏ!
+        </h2>
+        <p style="font-size: 1.15rem; color: #64748b; font-weight: 600; line-height: 1.5;">
+          Bé tên là gì nào? Hãy nhập tên để bạn Cú Pip và cô cùng trò chuyện với bé nha!
+        </p>
+
+        <input type="text" id="player-name-input" class="name-input-field" placeholder="Ví dụ: Teppy, Bo, Bắp..." maxlength="12" autocomplete="off" />
+
+        <div style="font-size: 0.95rem; font-weight: 700; color: #475569; margin-bottom: 8px;">
+          Chọn biểu tượng bé thích nhất:
+        </div>
+        <div class="avatar-selector-row" id="avatar-selector">
+          <button class="avatar-pick-btn selected" data-avatar="⭐️">⭐️</button>
+          <button class="avatar-pick-btn" data-avatar="🦁">🦁</button>
+          <button class="avatar-pick-btn" data-avatar="🐰">🐰</button>
+          <button class="avatar-pick-btn" data-avatar="🐱">🐱</button>
+          <button class="avatar-pick-btn" data-avatar="🦄">🦄</button>
+          <button class="avatar-pick-btn" data-avatar="🚀">🚀</button>
+          <button class="avatar-pick-btn" data-avatar="👑">👑</button>
+        </div>
+
+        <button id="name-submit-btn" class="btn btn-coral" style="width: 100%; font-size: 1.35rem;">
+          <span>🚀</span> <span>Vào Vương Quốc Toán Nào!</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Round Complete Victory Modal -->
   <div id="win-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="win-modal-title">
-    <div class="modal-card" style="max-width: 440px; text-align: center;">
+    <div class="modal-card" style="max-width: 460px; text-align: center;">
       <div class="modal-body round-complete-dialog">
-        <div class="trophy-icon">🏆</div>
-        <h2 id="win-modal-title" style="font-size: 2rem; color: #15803d; margin: 12px 0 6px;">Xuất Sắc Hoàn Thành!</h2>
-        <p style="font-size: 1.15rem; font-weight: 600; color: #475569;">Bé đã trả lời đúng tất cả các câu hỏi rồi!</p>
+        <div class="trophy-icon">🎆🏆🌸</div>
+        <h2 id="win-modal-title" style="font-size: 1.85rem; color: #15803d; margin: 12px 0 6px;">
+          Bé <span id="win-player-name">Teppy</span> Giỏi Quá!
+        </h2>
+        <p style="font-size: 1.15rem; font-weight: 600; color: #475569;">
+          Xuất sắc hoàn thành thử thách! Hoa và pháo hoa nở rực rỡ tặng bé nè!
+        </p>
         <div id="win-stars-msg" style="font-family: var(--font-heading); font-size: 1.6rem; color: #b45309; margin: 16px 0;">
           +3 Ngôi Sao Lấp Lánh!
         </div>
         <button id="win-continue-btn" class="btn btn-coral" style="font-size: 1.3rem; width: 100%;">
-          <span>🌟</span> <span>Tiếp Tục Khám Phá!</span>
+          <span>🌟</span> <span>Tiếp Tục Khám Phá Nào!</span>
         </button>
       </div>
     </div>

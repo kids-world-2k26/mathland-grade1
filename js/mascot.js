@@ -1,29 +1,36 @@
-// Mascot Companion "Pip the Owl" for MathLand Adventure
+import { store } from './state.js';
 import { sounds } from './audio.js';
 
 const MASCOT_MESSAGES = {
   welcome: [
-    "Chào bạn nhỏ! Cùng khám phá vương quốc toán học nhé!",
-    "Bé hãy chọn một hòn đảo kỳ diệu để bắt đầu nào!",
-    "Cùng đếm số, làm toán và thu thập thật nhiều ngôi sao lấp lánh nào!"
+    "Chào bé {name} nha! Hôm nay cùng cô khám phá vương quốc toán học nghen!",
+    "Bé {name} ơi, chọn một hòn đảo kỳ diệu để tụi mình cùng chơi nào!",
+    "Cùng đếm số và rinh thật nhiều ngôi sao lấp lánh nha bé {name}!"
   ],
   correct: [
-    "Hoan hô! Bé trả lời đúng rồi! 🌟",
-    "Tuyệt vời ông mặt trời! Bé thông minh quá!",
-    "Chính xác luôn! Bé làm tốt lắm!",
-    "Đỉnh chóp! Tiếp tục phát huy nào!",
-    "Bé giỏi quá đi thôi! Hãy tỏa sáng nào!"
+    "Đúng rồi! Bé {name} giỏi quá ta! 🌟",
+    "Chính xác! Bé {name} làm xuất sắc lắm nha!",
+    "Tuyệt quá! {name} thông minh ghê luôn!",
+    "Đúng rồi nè! {name} giỏi quá chừng!",
+    "Bé {name} siêu quá ta ơi! Quá đỉnh luôn nè!",
+    "Bingo! {name} tính nhanh như chớp vậy đó!",
+    "Hay dữ ta! Bé {name} làm đúng nữa rồi!",
+    "Giỏi quá trời quá đất! Điểm mười cho {name} nha!",
+    "Hoan hô {name}! Bé làm cô vui quá nè!",
+    "Chính xác luôn! {name} ơi, tiếp tục tỏa sáng nha!",
+    "Bé {name} thông thái số một luôn ta ơi!",
+    "Đúng rồi! Cô khen bé {name} làm nhanh xuất sắc nghen!"
   ],
   tryAgain: [
-    "Gần đúng rồi! Bé hãy bình tĩnh đếm lại nhé!",
-    "Úi chà! Không sao cả, mình cùng thử lại nào!",
-    "Cố lên bé ơi! Đếm từng cái một xem sao nhé!",
-    "Bé làm được mà! Thử lại một lần nữa nhé!"
+    "Gần đúng rồi nè {name} ơi! Bình tĩnh nhìn kỹ lại chút xíu nha!",
+    "Úi chà! Không sao đâu bé {name}, mình cùng thử lại nghen!",
+    "Cố lên nha {name}! Đếm chậm từng cái một xem sao nè!",
+    "Bé {name} làm được mà! Thử lại một lần nữa là trúng liền nè!"
   ],
   roundWin: [
-    "Bé đã hoàn thành xuất sắc! Nhận ngay 3 ngôi sao lấp lánh nào!",
-    "Chúc mừng bé! Hãy xem nhãn dán mới toanh nhé!",
-    "Tuyệt vời quá! Bé ngày càng thông thái hơn rồi đấy!"
+    "Hoan hô! Bé {name} đã hoàn thành bài tập xuất sắc dữ luôn! Rinh 3 ngôi sao nghen!",
+    "Chúc mừng {name} nha! Mở quà xem nhãn dán mới toanh nè!",
+    "Tuyệt vời quá {name} ơi! Càng chơi bé càng thông minh xuất sắc!"
   ]
 };
 
@@ -31,6 +38,7 @@ class Mascot {
   constructor() {
     this.name = 'Cú Vàng Pip';
     this.currentText = '';
+    this.lastPraiseIndex = -1;
   }
 
   init() {
@@ -76,7 +84,16 @@ class Mascot {
 
   sayRandom(category, autoRead = false) {
     const list = MASCOT_MESSAGES[category] || MASCOT_MESSAGES.welcome;
-    const msg = list[Math.floor(Math.random() * list.length)];
+    let chosenIdx = Math.floor(Math.random() * list.length);
+    if (list.length > 1 && chosenIdx === this.lastPraiseIndex) {
+      chosenIdx = (chosenIdx + 1) % list.length;
+    }
+    this.lastPraiseIndex = chosenIdx;
+
+    let msg = list[chosenIdx];
+    const name = store.getPlayerName();
+    msg = msg.replace(/\{name\}/g, name);
+
     this.say(msg, autoRead);
   }
 }

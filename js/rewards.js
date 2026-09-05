@@ -3,6 +3,10 @@ import { store, ALL_STICKERS } from './state.js';
 import { sounds } from './audio.js';
 
 export function fireConfetti() {
+  fireFireworksAndFlowers();
+}
+
+export function fireFireworksAndFlowers() {
   const canvas = document.createElement('canvas');
   canvas.style.position = 'fixed';
   canvas.style.top = '0';
@@ -18,42 +22,103 @@ export function fireConfetti() {
   canvas.height = window.innerHeight;
 
   const particles = [];
-  const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#facc15'];
+  const flowers = [];
+  const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#facc15', '#06b6d4', '#f97316'];
+  const flowerEmojis = ['🌸', '🌺', '🌼', '🌻', '🌷', '💐', '✨', '⭐️'];
 
-  for (let i = 0; i < 90; i++) {
-    particles.push({
-      x: canvas.width / 2 + (Math.random() * 200 - 100),
-      y: canvas.height * 0.45,
-      vx: (Math.random() - 0.5) * 16,
-      vy: Math.random() * -18 - 4,
-      size: Math.random() * 10 + 6,
-      color: colors[Math.floor(Math.random() * colors.length)],
+  // Sound effects: Launch multiple firework bursts & sparkles
+  sounds.playFireworkBurst();
+  setTimeout(() => sounds.playSparkle(), 300);
+  setTimeout(() => sounds.playFireworkBurst(), 700);
+  setTimeout(() => sounds.playSparkle(), 1100);
+
+  // 1. Firework burst particles (multiple centers)
+  const burstCenters = [
+    { x: canvas.width * 0.25, y: canvas.height * 0.35 },
+    { x: canvas.width * 0.5, y: canvas.height * 0.25 },
+    { x: canvas.width * 0.75, y: canvas.height * 0.35 }
+  ];
+
+  burstCenters.forEach(center => {
+    for (let i = 0; i < 45; i++) {
+      const angle = (Math.PI * 2 * i) / 45;
+      const speed = Math.random() * 8 + 3;
+      particles.push({
+        x: center.x,
+        y: center.y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        opacity: 1,
+        decay: Math.random() * 0.015 + 0.008
+      });
+    }
+  });
+
+  // 2. Blooming Flower floating elements drifting across the screen
+  for (let i = 0; i < 28; i++) {
+    flowers.push({
+      x: Math.random() * canvas.width,
+      y: canvas.height + Math.random() * 100,
+      vx: (Math.random() - 0.5) * 3,
+      vy: -(Math.random() * 5 + 3.5), // Float upwards
+      emoji: flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)],
+      size: Math.random() * 18 + 24, // 24px to 42px font size
       rotation: Math.random() * 360,
-      vRot: (Math.random() - 0.5) * 15,
+      vRot: (Math.random() - 0.5) * 6,
       opacity: 1
     });
   }
 
   let animationFrame;
+  let frameCount = 0;
+
   function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     let alive = false;
+    frameCount++;
 
+    // Draw & update firework sparkle particles
     particles.forEach(p => {
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.55; // gravity
-      p.rotation += p.vRot;
-      p.opacity -= 0.012;
+      p.vy += 0.18; // gravity
+      p.opacity -= p.decay;
 
       if (p.opacity > 0) {
         alive = true;
         ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.globalAlpha = Math.max(0, p.opacity);
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    });
+
+    // Draw & update floating flowers
+    flowers.forEach(f => {
+      f.x += f.vx + Math.sin(frameCount * 0.05) * 0.8; // gentle swaying
+      f.y += f.vy;
+      f.rotation += f.vRot;
+      if (f.y < canvas.height * 0.4) {
+        f.opacity -= 0.01;
+      }
+
+      if (f.opacity > 0 && f.y > -50) {
+        alive = true;
+        ctx.save();
+        ctx.translate(f.x, f.y);
+        ctx.rotate((f.rotation * Math.PI) / 180);
+        ctx.font = `${f.size}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.globalAlpha = Math.max(0, f.opacity);
+        ctx.fillText(f.emoji, 0, 0);
         ctx.restore();
       }
     });

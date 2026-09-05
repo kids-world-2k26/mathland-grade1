@@ -36,7 +36,8 @@ class StateStore {
       unlockedStickers: [],
       zoneStats: {},
       currentStreak: 0,
-      playerName: 'Math Explorer'
+      playerName: '',
+      playerAvatar: '⭐️'
     };
   }
 
@@ -46,6 +47,24 @@ class StateStore {
     } catch (e) {
       console.warn('Could not save state to localStorage', e);
     }
+  }
+
+  getPlayerName() {
+    return this.data.playerName || 'Bé Yêu';
+  }
+
+  hasCustomName() {
+    return !!(this.data.playerName && this.data.playerName.trim().length > 0);
+  }
+
+  setPlayerName(name, avatar = '⭐️') {
+    this.data.playerName = (name || '').trim();
+    if (avatar) this.data.playerAvatar = avatar;
+    this.save();
+  }
+
+  getPlayerAvatar() {
+    return this.data.playerAvatar || '⭐️';
   }
 
   addStars(count = 1) {

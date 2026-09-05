@@ -92,6 +92,7 @@ class App {
     this.updateHeaderStats();
     mascot.init();
     this.bindGlobalEvents();
+    this.initPlayerNamePrompt();
     this.renderHub();
   }
 
@@ -101,6 +102,69 @@ class App {
 
     const stickerCountEl = document.getElementById('header-stickers-count');
     if (stickerCountEl) stickerCountEl.textContent = `${store.getStickerCount()} Nhãn dán`;
+
+    const playerNameEl = document.getElementById('header-player-name');
+    if (playerNameEl) playerNameEl.textContent = `Bé ${store.getPlayerName()}`;
+
+    const playerAvatarEl = document.getElementById('header-player-avatar');
+    if (playerAvatarEl) playerAvatarEl.textContent = store.getPlayerAvatar();
+  }
+
+  initPlayerNamePrompt() {
+    const nameModal = document.getElementById('name-modal');
+    const nameInput = document.getElementById('player-name-input');
+    const submitBtn = document.getElementById('name-submit-btn');
+    const avatarBtns = document.querySelectorAll('.avatar-pick-btn');
+    let selectedAvatar = store.getPlayerAvatar() || '⭐️';
+
+    avatarBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sounds.playPop();
+        avatarBtns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedAvatar = btn.getAttribute('data-avatar');
+      });
+    });
+
+    const saveName = () => {
+      const val = nameInput.value.trim();
+      const finalName = val.length > 0 ? val : 'Teppy';
+      store.setPlayerName(finalName, selectedAvatar);
+      this.updateHeaderStats();
+      nameModal.classList.remove('open');
+      sounds.playPop();
+      mascot.say(`Chào bé ${finalName} nghen! Cô và bạn Cú Pip rất vui được học cùng bé!`, true);
+    };
+
+    if (submitBtn) {
+      submitBtn.addEventListener('click', saveName);
+    }
+
+    if (nameInput) {
+      nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') saveName();
+      });
+    }
+
+    // Profile button allows changing name anytime
+    const profileBtn = document.getElementById('player-profile-btn');
+    if (profileBtn) {
+      profileBtn.addEventListener('click', () => {
+        sounds.playPop();
+        nameInput.value = store.getPlayerName();
+        nameModal.classList.add('open');
+        setTimeout(() => nameInput.focus(), 200);
+      });
+    }
+
+    // If first visit and has no custom name, prompt modal!
+    if (!store.hasCustomName()) {
+      setTimeout(() => {
+        nameModal.classList.add('open');
+        nameInput.value = '';
+        setTimeout(() => nameInput.focus(), 250);
+      }, 400);
+    }
   }
 
   bindGlobalEvents() {
@@ -282,7 +346,21 @@ class App {
       this.answeringLocked = true;
       sounds.playCorrect();
       btnEl.classList.add('correct');
-      mascot.sayRandom('correct');
+
+      // Mascot says and reads personalized praise out loud in Southern female voice!
+      mascot.sayRandom('correct', true);
+
+      // Temporary floating praise badge on stage
+      const stageEl = document.getElementById('manipulative-stage');
+      if (stageEl) {
+        const praiseEl = document.createElement('div');
+        praiseEl.className = 'floating-praise-badge';
+        praiseEl.textContent = mascot.currentText;
+        stageEl.appendChild(praiseEl);
+        setTimeout(() => {
+          if (praiseEl.parentNode) praiseEl.parentNode.removeChild(praiseEl);
+        }, 1200);
+      }
 
       setTimeout(() => {
         this.questionIndex++;
@@ -291,11 +369,11 @@ class App {
         } else {
           this.loadQuestion();
         }
-      }, 1000);
+      }, 1200);
     } else {
       sounds.playWrong();
       btnEl.classList.add('wrong');
-      mascot.sayRandom('tryAgain');
+      mascot.sayRandom('tryAgain', true);
       setTimeout(() => {
         btnEl.classList.remove('wrong');
       }, 600);
@@ -304,7 +382,7 @@ class App {
 
   completeRound() {
     sounds.playFanfare();
-    fireConfetti();
+    fireConfetti(); // Triggers fireworks, sparkling flowers and explosion audio
 
     // Reward stars
     const newStickers = store.addStars(3);
@@ -318,9 +396,13 @@ class App {
       });
     }
 
-    mascot.sayRandom('roundWin');
+    mascot.sayRandom('roundWin', true);
 
     const winModal = document.getElementById('win-modal');
+    const winPlayerName = document.getElementById('win-player-name');
+    if (winPlayerName) {
+      winPlayerName.textContent = store.getPlayerName();
+    }
     const winStarsMsg = document.getElementById('win-stars-msg');
     if (winStarsMsg) {
       winStarsMsg.textContent = `+3 Ngôi Sao Lấp Lánh!`;
