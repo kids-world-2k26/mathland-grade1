@@ -231,55 +231,117 @@ class SoundManager {
     });
   }
 
-  // Text-To-Speech Read-Aloud Helper - Giọng Nữ Miền Nam Việt Nam đọc to, đầy đủ
+  // Text-To-Speech Read-Aloud Helper - Giọng Nữ Miền Nam Việt Nam đọc to, đầy đủ, ngọt ngào
   speak(text, onEndCallback = null) {
-    if (!this.speechEnabled || !('speechSynthesis' in window)) {
+    if (!this.speechEnabled) {
+      if (onEndCallback) onEndCallback();
+      return;
+    }
+
+    // Dừng âm thanh đang phát trước đó
+    if (this.currentAudio) {
+      try {
+        this.currentAudio.pause();
+        this.currentAudio = null;
+      } catch (e) {}
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    // 1. Kiểm tra nếu trình duyệt có sẵn giọng Nữ miền Nam chuẩn như Microsoft Hoài My (Edge)
+    const voices = ('speechSynthesis' in window) ? window.speechSynthesis.getVoices() : [];
+    const hoaiMyVoice = voices.find(v => 
+      (v.lang.startsWith('vi') || v.lang.includes('VIE')) && 
+      (v.name.toLowerCase().includes('hoaimy') || 
+       v.name.toLowerCase().includes('linh') || 
+       v.name.toLowerCase().includes('mai'))
+    );
+
+    if (hoaiMyVoice) {
+      this.speakViaSynthesis(text, hoaiMyVoice, onEndCallback);
+      return;
+    }
+
+    // 2. Mặc định sử dụng Giọng Nữ Tự Nhiên (Online Natural Vietnamese Female Voice) - trong trẻo, ngọt ngào
+    this.speakViaOnlineFemaleTTS(text, onEndCallback);
+  }
+
+  speakViaOnlineFemaleTTS(text, onEndCallback = null) {
+    try {
+      const encoded = encodeURIComponent(text);
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encoded}`;
+      const audio = new Audio(url);
+      this.currentAudio = audio;
+      audio.volume = 1.0;
+      audio.playbackRate = 0.95;
+
+      let called = false;
+      const finish = () => {
+        if (!called) {
+          called = true;
+          this.currentAudio = null;
+          if (onEndCallback) onEndCallback();
+        }
+      };
+
+      audio.onended = finish;
+      audio.onerror = () => {
+        // Dự phòng bằng SpeechSynthesis nếu ngoại tuyến
+        this.speakViaSynthesis(text, null, onEndCallback);
+      };
+
+      // Timeout dự phòng
+      const fallbackTime = Math.max(2200, text.length * 115);
+      setTimeout(finish, fallbackTime);
+
+      const promise = audio.play();
+      if (promise !== undefined) {
+        promise.catch(() => {
+          this.speakViaSynthesis(text, null, onEndCallback);
+        });
+      }
+    } catch (e) {
+      this.speakViaSynthesis(text, null, onEndCallback);
+    }
+  }
+
+  speakViaSynthesis(text, voice = null, onEndCallback = null) {
+    if (!('speechSynthesis' in window)) {
       if (onEndCallback) onEndCallback();
       return;
     }
 
     try {
-      window.speechSynthesis.cancel(); // Dừng câu trước nếu có
-
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'vi-VN';
-      utterance.volume = 1.0; // Đọc to rõ ràng tối đa
-      utterance.rate = 0.92;   // Tốc độ vừa phải, tròn vành rõ chữ
-      utterance.pitch = 1.25;  // Cao độ trong trẻo, ngọt ngào của giọng nữ miền Nam
+      utterance.volume = 1.0;
+      utterance.rate = 0.92;
+      utterance.pitch = voice ? 1.15 : 1.45; // Nếu là giọng máy mặc định thì đẩy cao độ nữ tính
 
-      // Tìm giọng nữ miền Nam Việt Nam (HoaiMy, Linh, Mai, Google Tiếng Việt...)
-      const voices = window.speechSynthesis.getVoices();
-      const southernFemaleVoice = voices.find(v => 
-        (v.lang.startsWith('vi') || v.lang.includes('VIE')) && 
-        (v.name.toLowerCase().includes('hoaimy') || 
-         v.name.toLowerCase().includes('linh') || 
-         v.name.toLowerCase().includes('mai') || 
-         v.name.toLowerCase().includes('female') ||
-         v.name.toLowerCase().includes('google'))
-      ) || voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VIE'));
-
-      if (southernFemaleVoice) {
-        utterance.voice = southernFemaleVoice;
+      if (voice) {
+        utterance.voice = voice;
+      } else {
+        const voices = window.speechSynthesis.getVoices();
+        const viVoice = voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VIE'));
+        if (viVoice) utterance.voice = viVoice;
       }
 
-      let callbackFired = false;
-      const fireEnd = () => {
-        if (!callbackFired) {
-          callbackFired = true;
+      let called = false;
+      const finish = () => {
+        if (!called) {
+          called = true;
           if (onEndCallback) onEndCallback();
         }
       };
 
-      utterance.onend = fireEnd;
-      utterance.onerror = fireEnd;
-
-      // Timeout dự phòng trong trường hợp trình duyệt không kích hoạt onend
-      const fallbackTime = Math.max(1800, text.length * 110);
-      setTimeout(fireEnd, fallbackTime);
+      utterance.onend = finish;
+      utterance.onerror = finish;
+      const fallbackTime = Math.max(2200, text.length * 115);
+      setTimeout(finish, fallbackTime);
 
       window.speechSynthesis.speak(utterance);
     } catch (err) {
-      console.warn('Speech synthesis error', err);
       if (onEndCallback) onEndCallback();
     }
   }
