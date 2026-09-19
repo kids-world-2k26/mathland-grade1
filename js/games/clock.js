@@ -1,36 +1,64 @@
-// Interactive Analog Clock Game Module (Telling Time to Hour & Half-Hour)
+// Interactive Analog Clock Game Module (Telling Time to Hour & Half-Hour, Daily Routine & Calendar)
+// Bám sát Bài 34, 35, 36, 37 SGK Toán 1 Tập 2: Thời gian. Giờ và lịch
 import { sounds } from '../audio.js';
 
 const DAYS = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
 
-export function generateClockQuestion() {
-  const isDayQuestion = Math.random() < 0.4;
+const ROUTINES = [
+  { hour: 7, minute: 0, timeStr: '7:00', title: '7 giờ sáng', desc: 'Bé cắp sách đến trường đi học 🎒', emoji: '🏫' },
+  { hour: 11, minute: 30, timeStr: '11:30', title: '11 giờ rưỡi trưa', desc: 'Bé cùng các bạn ăn cơm trưa ngon lành 🍱', emoji: '🍚' },
+  { hour: 14, minute: 0, timeStr: '14:00', title: '2 giờ chiều', desc: 'Bé thức dậy sau giấc ngủ trưa và học bài 📚', emoji: '📖' },
+  { hour: 17, minute: 0, timeStr: '17:00', title: '5 giờ chiều', desc: 'Bé tan học và đá bóng cùng bạn bè ⚽️', emoji: '🏃' },
+  { hour: 20, minute: 0, timeStr: '20:00', title: '8 giờ tối', desc: 'Bé cùng bố mẹ đọc sách truyện thiếu nhi 🌙', emoji: '🛋️' },
+  { hour: 21, minute: 30, timeStr: '21:30', title: '9 giờ rưỡi tối', desc: 'Bé đánh răng và lên giường ngủ say giấc 😴', emoji: '🛏️' }
+];
 
-  if (isDayQuestion) {
+export function generateClockQuestion() {
+  const mode = Math.floor(Math.random() * 3);
+
+  if (mode === 0) {
+    // Mode 0: Giờ sinh hoạt thực tế trong ngày (Bài 36 SGK)
+    const r = ROUTINES[Math.floor(Math.random() * ROUTINES.length)];
+    const timeAnswer = r.title;
+
+    const choices = [timeAnswer];
+    while (choices.length < 3) {
+      const other = ROUTINES[Math.floor(Math.random() * ROUTINES.length)].title;
+      if (!choices.includes(other)) choices.push(other);
+    }
+    choices.sort(() => Math.random() - 0.5);
+
+    return {
+      type: 'routine',
+      routine: r,
+      hour: r.hour > 12 ? r.hour - 12 : r.hour,
+      minute: r.minute,
+      correctAnswer: timeAnswer,
+      choices,
+      promptText: `Lúc ${r.title}, ${r.desc}. Đồng hồ đang chỉ mấy giờ?`,
+      hintText: `Quan sát kim ngắn (chỉ giờ) và kim dài (chỉ phút) trên mặt đồng hồ nhé!`
+    };
+  } else if (mode === 1) {
+    // Mode 1: Calendar Days (Bài 35 SGK)
     const subType = Math.random() > 0.5 ? 'next' : 'prev';
     const dayIdx = Math.floor(Math.random() * DAYS.length);
     const today = DAYS[dayIdx];
 
     let targetIdx;
     let promptText = '';
-    let questionText = '';
     if (subType === 'next') {
       targetIdx = (dayIdx + 1) % DAYS.length;
-      promptText = `Hôm nay là ${today}. Ngày mai là ngày nào?`;
-      questionText = `Ngày mai là thứ mấy?`;
+      promptText = `Hôm nay là ${today}. Ngày mai là ngày nào trong tuần?`;
     } else {
       targetIdx = (dayIdx - 1 + DAYS.length) % DAYS.length;
-      promptText = `Hôm nay là ${today}. Hôm qua là ngày nào?`;
-      questionText = `Hôm qua là thứ mấy?`;
+      promptText = `Hôm nay là ${today}. Hôm qua là ngày nào trong tuần?`;
     }
 
     const answer = DAYS[targetIdx];
     const choices = [answer];
     while (choices.length < 3) {
       const pick = DAYS[Math.floor(Math.random() * DAYS.length)];
-      if (!choices.includes(pick)) {
-        choices.push(pick);
-      }
+      if (!choices.includes(pick)) choices.push(pick);
     }
     choices.sort(() => Math.random() - 0.5);
 
@@ -41,41 +69,38 @@ export function generateClockQuestion() {
       choices,
       correctAnswer: answer,
       promptText,
-      hintText: `Một tuần có 7 ngày bắt đầu từ Thứ Hai đến Chủ Nhật nhé bé!`
+      hintText: `Một tuần có 7 ngày từ Thứ Hai đến Chủ Nhật nhé bé!`
+    };
+  } else {
+    // Mode 2: Classic Clock (Giờ đúng & Giờ rưỡi - Bài 34 SGK)
+    const isHalfHour = Math.random() > 0.5;
+    const hour = Math.floor(Math.random() * 12) + 1; // 1 to 12
+    const minute = isHalfHour ? 30 : 0;
+
+    const timeString = isHalfHour ? `${hour} giờ rưỡi (30 phút)` : `${hour} giờ đúng`;
+
+    const choices = [timeString];
+    while (choices.length < 3) {
+      const dHour = Math.floor(Math.random() * 12) + 1;
+      const dHalf = Math.random() > 0.5;
+      const dStr = dHalf ? `${dHour} giờ rưỡi (30 phút)` : `${dHour} giờ đúng`;
+      if (!choices.includes(dStr)) choices.push(dStr);
+    }
+    choices.sort(() => Math.random() - 0.5);
+
+    return {
+      type: 'clock',
+      hour,
+      minute,
+      timeString,
+      correctAnswer: timeString,
+      choices,
+      promptText: `Đồng hồ đang chỉ mấy giờ?`,
+      hintText: isHalfHour
+        ? `Kim phút màu xanh dài chỉ thẳng xuống số 6 là 30 phút (giờ rưỡi)!`
+        : `Kim phút màu xanh dài chỉ thẳng lên số 12 là đúng giờ tròn!`
     };
   }
-
-  // Clock question
-  const isHalfHour = Math.random() > 0.5;
-  const hour = Math.floor(Math.random() * 12) + 1; // 1 to 12
-  const minute = isHalfHour ? 30 : 0;
-
-  const timeString = `${hour}:${minute === 0 ? '00' : '30'}`;
-
-  // Distractors
-  const choices = [timeString];
-  while (choices.length < 3) {
-    const dHour = Math.floor(Math.random() * 12) + 1;
-    const dMin = Math.random() > 0.5 ? 30 : 0;
-    const dStr = `${dHour}:${dMin === 0 ? '00' : '30'}`;
-    if (!choices.includes(dStr)) {
-      choices.push(dStr);
-    }
-  }
-  choices.sort(() => Math.random() - 0.5);
-
-  return {
-    type: 'clock',
-    hour,
-    minute,
-    timeString,
-    correctAnswer: timeString,
-    choices,
-    promptText: `Đồng hồ đang chỉ mấy giờ?`,
-    hintText: isHalfHour
-      ? `Kim phút màu xanh dài chỉ thẳng xuống số 6 (30 phút / rưỡi)!`
-      : `Kim phút màu xanh dài chỉ thẳng lên số 12 (giờ đúng: 00 phút)!`
-  };
 }
 
 export function renderClockStage(question, onAnswer) {
@@ -88,147 +113,79 @@ export function renderClockStage(question, onAnswer) {
   if (question.type === 'calendar') {
     const calCard = document.createElement('div');
     calCard.style.background = 'white';
-    calCard.style.borderRadius = '22px';
-    calCard.style.border = '4px solid #fed7aa';
-    calCard.style.boxShadow = '0 10px 25px rgba(234, 88, 12, 0.15)';
-    calCard.style.width = '260px';
-    calCard.style.overflow = 'hidden';
-    calCard.style.marginBottom = '20px';
+    calCard.style.border = '3px solid #fbcfe8';
+    calCard.style.borderRadius = '24px';
+    calCard.style.padding = '24px 36px';
+    calCard.style.boxShadow = 'var(--shadow-md)';
     calCard.style.textAlign = 'center';
+    calCard.style.margin = '20px 0';
 
-    const calHeader = document.createElement('div');
-    calHeader.style.background = '#ea580c';
-    calHeader.style.color = 'white';
-    calHeader.style.padding = '10px 0';
-    calHeader.style.fontFamily = 'var(--font-heading)';
-    calHeader.style.fontWeight = '700';
-    calHeader.style.fontSize = '1.2rem';
-    calHeader.textContent = '📅 LỊCH TUẦN LỄ';
-
-    const calBody = document.createElement('div');
-    calBody.style.padding = '20px 16px';
-
-    const todayTag = document.createElement('div');
-    todayTag.style.fontSize = '0.9rem';
-    todayTag.style.color = '#64748b';
-    todayTag.style.fontWeight = '700';
-    todayTag.textContent = 'HÔM NAY';
-
-    const todayName = document.createElement('div');
-    todayName.style.fontSize = '2rem';
-    todayName.style.fontFamily = 'var(--font-heading)';
-    todayName.style.fontWeight = '800';
-    todayName.style.color = '#c2410c';
-    todayName.style.margin = '4px 0 10px';
-    todayName.textContent = question.today;
-
-    const askTag = document.createElement('div');
-    askTag.style.background = '#ffedd5';
-    askTag.style.padding = '8px 12px';
-    askTag.style.borderRadius = '14px';
-    askTag.style.fontSize = '1.05rem';
-    askTag.style.fontWeight = '700';
-    askTag.style.color = '#9a3412';
-    askTag.textContent = question.subType === 'next' ? '❓ Ngày mai là ngày nào?' : '❓ Hôm qua là ngày nào?';
-
-    calBody.appendChild(todayTag);
-    calBody.appendChild(todayName);
-    calBody.appendChild(askTag);
-
-    calCard.appendChild(calHeader);
-    calCard.appendChild(calBody);
-
+    calCard.innerHTML = `
+      <div style="font-size: 3.5rem; margin-bottom: 8px;">🗓️</div>
+      <div style="font-size: 1rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Hôm Nay Là</div>
+      <div style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; color: #db2777; margin: 4px 0 12px;">
+        ${question.today}
+      </div>
+      <div style="font-size: 1.05rem; color: #475569; font-weight: 600;">
+        ${question.subType === 'next' ? 'Bé hãy chọn xem ngày mai là thứ mấy nhé!' : 'Bé hãy nhớ lại xem hôm qua là thứ mấy nhé!'}
+      </div>
+    `;
     container.appendChild(calCard);
   } else {
-    const clockWrapper = document.createElement('div');
-    clockWrapper.className = 'clock-container';
+    // Render Clock Face (either routine or classic clock)
+    const clockBox = document.createElement('div');
+    clockBox.style.display = 'flex';
+    clockBox.style.flexDirection = 'column';
+    clockBox.style.alignItems = 'center';
+    clockBox.style.gap = '14px';
+    clockBox.style.margin = '16px 0';
 
-    // Calculate angles
-    // Minute hand: 360 deg for 60 min -> 6 deg/min
-    const minuteAngle = question.minute * 6;
-    // Hour hand: 360 deg for 12 hours -> 30 deg/hour + 0.5 deg/min
-    const hourAngle = (question.hour % 12) * 30 + (question.minute * 0.5);
-
-    const svgNS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(svgNS, "svg");
-    svg.setAttribute("width", "220");
-    svg.setAttribute("height", "220");
-    svg.setAttribute("viewBox", "0 0 200 200");
-    svg.classList.add("analog-clock-svg");
-
-    // Clock face
-    const face = document.createElementNS(svgNS, "circle");
-    face.setAttribute("cx", "100");
-    face.setAttribute("cy", "100");
-    face.setAttribute("r", "90");
-    face.setAttribute("fill", "#ffffff");
-    face.setAttribute("stroke", "#4f46e5");
-    face.setAttribute("stroke-width", "8");
-    svg.appendChild(face);
-
-    // Hour numerals 1 to 12
-    for (let i = 1; i <= 12; i++) {
-      const angle = (i * 30 - 90) * (Math.PI / 180);
-      const x = 100 + 68 * Math.cos(angle);
-      const y = 100 + 68 * Math.sin(angle) + 6; // adjust vertical baseline
-
-      const text = document.createElementNS(svgNS, "text");
-      text.setAttribute("x", x.toString());
-      text.setAttribute("y", y.toString());
-      text.setAttribute("text-anchor", "middle");
-      text.setAttribute("font-family", "Fredoka, sans-serif");
-      text.setAttribute("font-size", "18");
-      text.setAttribute("font-weight", "bold");
-      text.setAttribute("fill", "#1e293b");
-      text.textContent = i.toString();
-      svg.appendChild(text);
+    if (question.type === 'routine') {
+      const routineInfo = document.createElement('div');
+      routineInfo.style.background = '#f0fdf4';
+      routineInfo.style.border = '2px solid #86efac';
+      routineInfo.style.borderRadius = '16px';
+      routineInfo.style.padding = '10px 20px';
+      routineInfo.style.fontSize = '1.15rem';
+      routineInfo.style.fontWeight = '700';
+      routineInfo.style.color = '#15803d';
+      routineInfo.innerHTML = `${question.routine.emoji} ${question.routine.desc}`;
+      clockBox.appendChild(routineInfo);
     }
 
-    // Hour Hand (Shorter, Red)
-    const hourHand = document.createElementNS(svgNS, "line");
-    hourHand.setAttribute("x1", "100");
-    hourHand.setAttribute("y1", "100");
-    hourHand.setAttribute("x2", "100");
-    hourHand.setAttribute("y2", "54");
-    hourHand.setAttribute("stroke", "#ef4444");
-    hourHand.setAttribute("stroke-width", "6");
-    hourHand.setAttribute("stroke-linecap", "round");
-    hourHand.setAttribute("transform", `rotate(${hourAngle} 100 100)`);
-    svg.appendChild(hourHand);
+    const clockWrap = document.createElement('div');
+    clockWrap.className = 'analog-clock-container';
 
-    // Minute Hand (Longer, Blue)
-    const minuteHand = document.createElementNS(svgNS, "line");
-    minuteHand.setAttribute("x1", "100");
-    minuteHand.setAttribute("y1", "100");
-    minuteHand.setAttribute("x2", "100");
-    minuteHand.setAttribute("y2", "30");
-    minuteHand.setAttribute("stroke", "#0284c7");
-    minuteHand.setAttribute("stroke-width", "4");
-    minuteHand.setAttribute("stroke-linecap", "round");
-    minuteHand.setAttribute("transform", `rotate(${minuteAngle} 100 100)`);
-    svg.appendChild(minuteHand);
+    const hourDeg = (question.hour % 12) * 30 + (question.minute / 60) * 30;
+    const minDeg = question.minute * 6;
 
-    // Center Pin
-    const centerPin = document.createElementNS(svgNS, "circle");
-    centerPin.setAttribute("cx", "100");
-    centerPin.setAttribute("cy", "100");
-    centerPin.setAttribute("r", "7");
-    centerPin.setAttribute("fill", "#1e1b4b");
-    svg.appendChild(centerPin);
+    clockWrap.innerHTML = `
+      <div class="clock-face">
+        ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => {
+          const angle = (n * 30 - 90) * (Math.PI / 180);
+          const r = 85;
+          const x = 110 + r * Math.cos(angle);
+          const y = 110 + r * Math.sin(angle);
+          return `<span class="clock-number" style="left: ${x}px; top: ${y}px;">${n}</span>`;
+        }).join('')}
+        <div class="clock-hand hand-hour" style="transform: rotate(${hourDeg}deg)"></div>
+        <div class="clock-hand hand-minute" style="transform: rotate(${minDeg}deg)"></div>
+        <div class="clock-center-pin"></div>
+      </div>
+    `;
 
-    clockWrapper.appendChild(svg);
-    container.appendChild(clockWrapper);
+    clockBox.appendChild(clockWrap);
+    container.appendChild(clockBox);
   }
 
-  // Choices Row
+  // Choices
   const choicesRow = document.createElement('div');
   choicesRow.className = 'choices-row';
 
   question.choices.forEach(val => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.style.fontSize = typeof val === 'number' || val.length <= 5 ? '1.8rem' : '1.3rem';
-    btn.style.minWidth = typeof val === 'number' || val.length <= 5 ? '120px' : '140px';
+    btn.style.fontSize = '1.25rem';
     btn.textContent = val;
     btn.addEventListener('click', () => {
       onAnswer(val === question.correctAnswer, btn);

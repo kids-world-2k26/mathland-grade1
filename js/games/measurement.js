@@ -1,17 +1,50 @@
 // Measurement & Length Module (Dài Hơn - Ngắn Hơn & Đo Xăng-ti-mét)
+// Bám sát Bài 25, 26, 27, 28 SGK Toán 1 Tập 2 Kết Nối Tri Thức Với Cuộc Sống
 import { sounds } from '../audio.js';
 
 export function generateMeasurementQuestion() {
-  const isRulerMode = Math.random() > 0.45;
+  const mode = Math.floor(Math.random() * 3);
 
-  if (isRulerMode) {
-    // Mode B: Ruler measurement in cm
+  if (mode === 0) {
+    // Mode 0: Phép tính có đơn vị xăng-ti-mét (Bài 26 & 28 SGK)
+    const isAdd = Math.random() > 0.5;
+    let a, b, ans;
+
+    if (isAdd) {
+      a = Math.floor(Math.random() * 5) + 2; // 2 to 6 cm
+      b = Math.floor(Math.random() * 4) + 1; // 1 to 4 cm
+      ans = a + b;
+    } else {
+      a = Math.floor(Math.random() * 5) + 5; // 5 to 9 cm
+      b = Math.floor(Math.random() * (a - 2)) + 1;
+      ans = a - b;
+    }
+
+    const correctStr = `${ans} cm`;
+    const choices = [correctStr];
+    while (choices.length < 3) {
+      const dist = Math.max(1, Math.min(12, ans + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 2) + 1)));
+      const distStr = `${dist} cm`;
+      if (!choices.includes(distStr)) choices.push(distStr);
+    }
+    choices.sort(() => Math.random() - 0.5);
+
+    return {
+      mode: 'cm_math',
+      a, b, isAdd, ans,
+      correctAnswer: correctStr,
+      choices,
+      promptText: isAdd ? `Tính: ${a} cm + ${b} cm = ?` : `Tính: ${a} cm - ${b} cm = ?`,
+      hintText: `Bé cộng hoặc trừ các con số bình thường, rồi nhớ viết thêm chữ cm đằng sau nhé!`
+    };
+  } else if (mode === 1) {
+    // Mode 1: Thước đo cm (Bài 26 SGK)
     const lengthCm = Math.floor(Math.random() * 7) + 3; // 3 to 9 cm
     const items = [
       { name: 'bút chì', emoji: '✏️', color: '#f59e0b' },
       { name: 'bút sáp màu', emoji: '🖍️', color: '#ef4444' },
       { name: 'cục gôm tẩy', emoji: '🧼', color: '#06b6d4' },
-      { name: 'chiếc muỗng', emoji: '🥄', color: '#8b5cf6' }
+      { name: 'chiếc thìa', emoji: '🥄', color: '#8b5cf6' }
     ];
     const item = items[Math.floor(Math.random() * items.length)];
 
@@ -19,14 +52,12 @@ export function generateMeasurementQuestion() {
     while (choices.length < 3) {
       const dist = Math.max(1, Math.min(10, lengthCm + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 2) + 1)));
       const distStr = `${dist} cm`;
-      if (!choices.includes(distStr)) {
-        choices.push(distStr);
-      }
+      if (!choices.includes(distStr)) choices.push(distStr);
     }
     choices.sort(() => Math.random() - 0.5);
 
     return {
-      isRulerMode: true,
+      mode: 'ruler',
       lengthCm,
       item,
       choices,
@@ -35,10 +66,10 @@ export function generateMeasurementQuestion() {
       hintText: `Bé nhìn điểm đầu ở vạch số 0, điểm cuối chỉ đến vạch số mấy nhé!`
     };
   } else {
-    // Mode A: Compare longer / shorter
+    // Mode 2: So sánh Dài hơn / Ngắn hơn (Bài 25 SGK)
     const askLonger = Math.random() > 0.5;
-    const lenA = Math.floor(Math.random() * 4) + 6; // 6 to 9 (đại diện dài)
-    const lenB = Math.floor(Math.random() * 3) + 2; // 2 to 4 (đại diện ngắn)
+    const lenA = Math.floor(Math.random() * 4) + 6; // 6 to 9 (dài)
+    const lenB = Math.floor(Math.random() * 3) + 2; // 2 to 4 (ngắn)
 
     const isLeftLonger = Math.random() > 0.5;
     const item1Len = isLeftLonger ? lenA : lenB;
@@ -49,7 +80,7 @@ export function generateMeasurementQuestion() {
       : (isLeftLonger ? 'Bút chì B (Màu xanh)' : 'Bút chì A (Màu đỏ)');
 
     return {
-      isRulerMode: false,
+      mode: 'compare_len',
       askLonger,
       item1Len,
       item2Len,
@@ -68,8 +99,29 @@ export function renderMeasurementStage(question, onAnswer) {
   container.style.flexDirection = 'column';
   container.style.alignItems = 'center';
 
-  if (question.isRulerMode) {
-    // Render ruler and measuring object
+  if (question.mode === 'cm_math') {
+    const card = document.createElement('div');
+    card.style.background = 'white';
+    card.style.borderRadius = '24px';
+    card.style.padding = '24px 32px';
+    card.style.boxShadow = 'var(--shadow-md)';
+    card.style.border = '3px solid #67e8f9';
+    card.style.margin = '20px 0';
+    card.style.fontFamily = 'var(--font-heading)';
+    card.style.fontSize = '2.4rem';
+    card.style.fontWeight = '800';
+    card.style.color = '#0e7490';
+    card.style.textAlign = 'center';
+
+    card.innerHTML = `
+      <span>${question.a} cm</span>
+      <span style="color: ${question.isAdd ? '#10b981' : '#ef4444'}; margin: 0 10px;">${question.isAdd ? '+' : '-'}</span>
+      <span>${question.b} cm</span>
+      <span style="color: #64748b; margin: 0 10px;">=</span>
+      <span style="color: #d97706; background: #fef3c7; border: 2px dashed #f59e0b; padding: 4px 18px; border-radius: 16px;">?</span>
+    `;
+    container.appendChild(card);
+  } else if (question.mode === 'ruler') {
     const stageBox = document.createElement('div');
     stageBox.style.width = '100%';
     stageBox.style.maxWidth = '550px';
@@ -79,140 +131,114 @@ export function renderMeasurementStage(question, onAnswer) {
     stageBox.style.gap = '16px';
 
     // Object bar
+    const objBox = document.createElement('div');
+    objBox.style.display = 'flex';
+    objBox.style.alignItems = 'center';
+    objBox.style.height = '48px';
+    objBox.style.position = 'relative';
+
     const objectBar = document.createElement('div');
-    objectBar.style.height = '48px';
-    objectBar.style.borderRadius = '12px';
-    objectBar.style.background = `linear-gradient(90deg, ${question.item.color}, #fca5a5)`;
-    objectBar.style.width = `${(question.lengthCm / 10) * 100}%`;
+    const widthPct = (question.lengthCm / 10) * 100;
+    objectBar.style.width = `${widthPct}%`;
+    objectBar.style.height = '36px';
+    objectBar.style.background = question.item.color;
+    objectBar.style.borderRadius = '8px';
     objectBar.style.display = 'flex';
     objectBar.style.alignItems = 'center';
-    objectBar.style.paddingLeft = '12px';
-    objectBar.style.fontSize = '1.8rem';
-    objectBar.style.boxShadow = '0 6px 12px rgba(0,0,0,0.1)';
-    objectBar.style.transition = 'width 0.3s ease';
-    objectBar.innerHTML = `<span>${question.item.emoji}</span>`;
+    objectBar.style.justifyContent = 'space-between';
+    objectBar.style.padding = '0 8px';
+    objectBar.style.boxShadow = 'var(--shadow-sm)';
+    objectBar.innerHTML = `<span style="font-size: 1.4rem;">${question.item.emoji}</span><span style="font-weight: 700; color: white; font-size: 0.9rem;">${question.item.name}</span>`;
 
-    // Ruler (Thước kẻ chia vạch cm)
+    objBox.appendChild(objectBar);
+    stageBox.appendChild(objBox);
+
+    // Ruler
     const ruler = document.createElement('div');
-    ruler.style.position = 'relative';
-    ruler.style.width = '100%';
-    ruler.style.height = '64px';
-    ruler.style.background = '#fef3c7';
-    ruler.style.borderRadius = '10px';
-    ruler.style.border = '3px solid #d97706';
+    ruler.className = 'cm-ruler';
     ruler.style.display = 'flex';
-    ruler.style.justifyContent = 'space-between';
-    ruler.style.boxShadow = '0 8px 16px rgba(217, 119, 6, 0.15)';
+    ruler.style.width = '100%';
+    ruler.style.background = '#fef08a';
+    ruler.style.border = '2px solid #ca8a04';
+    ruler.style.borderRadius = '6px';
+    ruler.style.height = '60px';
+    ruler.style.position = 'relative';
 
     for (let i = 0; i <= 10; i++) {
-      const tickCol = document.createElement('div');
-      tickCol.style.display = 'flex';
-      tickCol.style.flexDirection = 'column';
-      tickCol.style.alignItems = 'center';
-      tickCol.style.position = 'relative';
-      tickCol.style.width = '2px';
+      const mark = document.createElement('div');
+      mark.style.position = 'absolute';
+      mark.style.left = `${(i / 10) * 100}%`;
+      mark.style.top = '0';
+      mark.style.bottom = '0';
+      mark.style.borderLeft = '2px solid #854d0e';
+      mark.style.paddingLeft = '4px';
 
-      const tickMark = document.createElement('div');
-      tickMark.style.width = '3px';
-      tickMark.style.height = i % 5 === 0 ? '24px' : '14px';
-      tickMark.style.background = '#78350f';
+      const label = document.createElement('span');
+      label.style.position = 'absolute';
+      label.style.bottom = '4px';
+      label.style.left = '4px';
+      label.style.fontFamily = 'var(--font-heading)';
+      label.style.fontSize = '0.85rem';
+      label.style.fontWeight = '700';
+      label.style.color = '#713f12';
+      label.textContent = i === 10 ? '10 cm' : i;
 
-      const tickLabel = document.createElement('span');
-      tickLabel.style.fontFamily = 'var(--font-heading)';
-      tickLabel.style.fontSize = '1rem';
-      tickLabel.style.fontWeight = '700';
-      tickLabel.style.color = '#78350f';
-      tickLabel.style.marginTop = '4px';
-      tickLabel.textContent = i.toString();
-
-      tickCol.appendChild(tickMark);
-      tickCol.appendChild(tickLabel);
-      ruler.appendChild(tickCol);
+      mark.appendChild(label);
+      ruler.appendChild(mark);
     }
 
-    stageBox.appendChild(objectBar);
     stageBox.appendChild(ruler);
     container.appendChild(stageBox);
   } else {
-    // Mode A: Compare 2 pencils
-    const compareBox = document.createElement('div');
-    compareBox.style.width = '100%';
-    compareBox.style.maxWidth = '550px';
-    compareBox.style.display = 'flex';
-    compareBox.style.flexDirection = 'column';
-    compareBox.style.gap = '20px';
-    compareBox.style.padding = '10px';
+    // Mode compare length
+    const stageBox = document.createElement('div');
+    stageBox.style.width = '100%';
+    stageBox.style.maxWidth = '500px';
+    stageBox.style.padding = '16px';
+    stageBox.style.display = 'flex';
+    stageBox.style.flexDirection = 'column';
+    stageBox.style.gap = '20px';
 
-    // Pencil A
-    const rowA = document.createElement('div');
-    rowA.style.display = 'flex';
-    rowA.style.alignItems = 'center';
-    rowA.style.gap = '14px';
-    const labelA = document.createElement('span');
-    labelA.style.fontFamily = 'var(--font-heading)';
-    labelA.style.fontSize = '1.2rem';
-    labelA.style.fontWeight = '700';
-    labelA.style.color = '#dc2626';
-    labelA.style.minWidth = '80px';
-    labelA.textContent = 'Bút chì A:';
+    const makePencil = (label, len, color, bg) => {
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.gap = '12px';
 
-    const barA = document.createElement('div');
-    barA.style.height = '42px';
-    barA.style.width = `${(question.item1Len / 10) * 100}%`;
-    barA.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
-    barA.style.borderRadius = '12px';
-    barA.style.display = 'flex';
-    barA.style.alignItems = 'center';
-    barA.style.paddingLeft = '10px';
-    barA.style.fontSize = '1.6rem';
-    barA.style.boxShadow = '0 4px 8px rgba(0,0,0,0.08)';
-    barA.innerHTML = '<span>✏️</span>';
+      const lbl = document.createElement('span');
+      lbl.style.width = '70px';
+      lbl.style.fontWeight = '700';
+      lbl.style.color = '#334155';
+      lbl.textContent = label;
 
-    rowA.appendChild(labelA);
-    rowA.appendChild(barA);
+      const bar = document.createElement('div');
+      bar.style.height = '34px';
+      bar.style.width = `${(len / 10) * 100}%`;
+      bar.style.background = bg;
+      bar.style.border = `2px solid ${color}`;
+      bar.style.borderRadius = '8px';
+      bar.style.display = 'flex';
+      bar.style.alignItems = 'center';
+      bar.style.padding = '0 8px';
+      bar.innerHTML = `<span style="font-size: 1.3rem;">✏️</span>`;
 
-    // Pencil B
-    const rowB = document.createElement('div');
-    rowB.style.display = 'flex';
-    rowB.style.alignItems = 'center';
-    rowB.style.gap = '14px';
-    const labelB = document.createElement('span');
-    labelB.style.fontFamily = 'var(--font-heading)';
-    labelB.style.fontSize = '1.2rem';
-    labelB.style.fontWeight = '700';
-    labelB.style.color = '#2563eb';
-    labelB.style.minWidth = '80px';
-    labelB.textContent = 'Bút chì B:';
+      row.appendChild(lbl);
+      row.appendChild(bar);
+      return row;
+    };
 
-    const barB = document.createElement('div');
-    barB.style.height = '42px';
-    barB.style.width = `${(question.item2Len / 10) * 100}%`;
-    barB.style.background = 'linear-gradient(90deg, #3b82f6, #60a5fa)';
-    barB.style.borderRadius = '12px';
-    barB.style.display = 'flex';
-    barB.style.alignItems = 'center';
-    barB.style.paddingLeft = '10px';
-    barB.style.fontSize = '1.6rem';
-    barB.style.boxShadow = '0 4px 8px rgba(0,0,0,0.08)';
-    barB.innerHTML = '<span>✏️</span>';
-
-    rowB.appendChild(labelB);
-    rowB.appendChild(barB);
-
-    compareBox.appendChild(rowA);
-    compareBox.appendChild(rowB);
-    container.appendChild(compareBox);
+    stageBox.appendChild(makePencil('Bút A:', question.item1Len, '#dc2626', '#fca5a5'));
+    stageBox.appendChild(makePencil('Bút B:', question.item2Len, '#2563eb', '#93c5fd'));
+    container.appendChild(stageBox);
   }
 
-  // Answer Choices Row
+  // Choices
   const choicesRow = document.createElement('div');
   choicesRow.className = 'choices-row';
 
   question.choices.forEach(val => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.style.fontSize = '1.4rem';
-    btn.style.minWidth = '140px';
     btn.textContent = val;
     btn.addEventListener('click', () => {
       onAnswer(val === question.correctAnswer, btn);

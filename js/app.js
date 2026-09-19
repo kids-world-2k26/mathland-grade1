@@ -15,6 +15,9 @@ import { generateMeasurementQuestion, renderMeasurementStage } from './games/mea
 import { generateWordProblemQuestion, renderWordProblemStage } from './games/wordproblems.js';
 import { generateSpatialQuestion, renderSpatialStage } from './games/spatial.js';
 import { generateTensQuestion, renderTensStage } from './games/tens.js';
+import { generateArenaQuestion, renderArenaStage } from './games/arena.js';
+import { generateMemoryQuestion, renderMemoryStage } from './games/memory.js';
+import { generateOrderingQuestion, renderOrderingStage } from './games/ordering.js';
 
 const TOTAL_QUESTIONS_PER_ROUND = 5;
 
@@ -128,6 +131,36 @@ const ZONES = {
     semester: 'both',
     generator: generateWordProblemQuestion,
     renderer: renderWordProblemStage
+  },
+  arena: {
+    id: 'arena',
+    name: 'Đấu Trường Toán Học Siêu Tốc',
+    icon: '⚡️',
+    desc: 'Thử thách phản xạ thần tốc, combo điểm mười và rinh cúp vàng!',
+    colorClass: 'card-arena',
+    semester: 'both',
+    generator: generateArenaQuestion,
+    renderer: renderArenaStage
+  },
+  memory: {
+    id: 'memory',
+    name: 'Lật Thẻ Ghép Cặp Kỳ Thú',
+    icon: '🃏',
+    desc: 'Lật tìm các cặp đôi tương ứng: phép tính, số lượng & hình học!',
+    colorClass: 'card-memory',
+    semester: 'both',
+    generator: generateMemoryQuestion,
+    renderer: renderMemoryStage
+  },
+  ordering: {
+    id: 'ordering',
+    name: 'Tàu Hỏa Sắp Xếp Dãy Số',
+    icon: '🚂',
+    desc: 'Sắp xếp thứ tự từ bé đến lớn, từ lớn đến bé & tìm toa tàu mất tích!',
+    colorClass: 'card-ordering',
+    semester: 'both',
+    generator: generateOrderingQuestion,
+    renderer: renderOrderingStage
   }
 };
 

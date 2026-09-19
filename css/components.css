@@ -464,6 +464,27 @@
   background: #ca8a04;
 }
 
+.zone-card.card-arena {
+  border-color: #fbcfe8;
+}
+.zone-card.card-arena::after {
+  background: #ec4899;
+}
+
+.zone-card.card-memory {
+  border-color: #ddd6fe;
+}
+.zone-card.card-memory::after {
+  background: #8b5cf6;
+}
+
+.zone-card.card-ordering {
+  border-color: #fed7aa;
+}
+.zone-card.card-ordering::after {
+  background: #ea580c;
+}
+
 .zone-icon-box {
   width: 80px;
   height: 80px;

@@ -1,32 +1,89 @@
 // Addition Adventure & Number Line Frog Hop Module
+// Bám sát Bài 10, 12, 13 SGK Toán 1: Phép cộng trong phạm vi 10 & Bảng cộng
 import { sounds } from '../audio.js';
 
 export function generateAdditionQuestion() {
-  const isNumberLine = Math.random() > 0.45;
-  const num1 = Math.floor(Math.random() * 6) + 1; // 1 to 6
-  const num2 = Math.floor(Math.random() * 5) + 1; // 1 to 5
-  const sum = num1 + num2;
+  const mode = Math.floor(Math.random() * 3);
 
-  const choices = [sum];
-  while (choices.length < 3) {
-    const dist = Math.max(2, Math.min(15, sum + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 2) + 1)));
-    if (!choices.includes(dist)) {
-      choices.push(dist);
+  if (mode === 0) {
+    // Mode 0: Phép cộng 3 số (Bài 12 & 13 SGK: a + b + c = ?)
+    const num1 = Math.floor(Math.random() * 4) + 1; // 1 to 4
+    const num2 = Math.floor(Math.random() * 3) + 1; // 1 to 3
+    const maxN3 = 10 - (num1 + num2);
+    const num3 = Math.floor(Math.random() * maxN3) + 1;
+    const sum = num1 + num2 + num3;
+
+    const choices = [sum];
+    while (choices.length < 3) {
+      const dist = Math.max(2, Math.min(10, sum + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 2) + 1)));
+      if (!choices.includes(dist)) choices.push(dist);
     }
-  }
-  choices.sort(() => Math.random() - 0.5);
+    choices.sort(() => Math.random() - 0.5);
 
-  return {
-    isNumberLine,
-    num1,
-    num2,
-    sum,
-    choices,
-    promptText: isNumberLine
-      ? `Nhảy về phía trước! ${num1} + ${num2} bằng bao nhiêu?`
-      : `Cùng làm phép cộng nào: ${num1} + ${num2} bằng bao nhiêu?`,
-    hintText: isNumberLine ? `Bắt đầu từ số ${num1} và nhảy ${num2} bước sang phải nhé!` : `Đếm tất cả các bạn nhỏ lại với nhau nhé!`
-  };
+    return {
+      mode: 'three_nums',
+      num1,
+      num2,
+      num3,
+      sum,
+      correctAnswer: sum,
+      choices,
+      promptText: `Tính phép cộng 3 số: ${num1} + ${num2} + ${num3} = ?`,
+      hintText: `Bé cộng lần lượt từ trái sang phải: tính ${num1} + ${num2} trước, rồi cộng tiếp ${num3} nhé!`
+    };
+  } else if (mode === 1) {
+    // Mode 1: Điền số còn thiếu vào phép cộng (a + ? = sum)
+    const num1 = Math.floor(Math.random() * 6) + 1; // 1 to 6
+    const missingNum = Math.floor(Math.random() * (10 - num1)) + 1;
+    const sum = num1 + missingNum;
+
+    const choices = [missingNum];
+    while (choices.length < 3) {
+      const dist = Math.max(1, Math.min(9, missingNum + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 2) + 1)));
+      if (!choices.includes(dist)) choices.push(dist);
+    }
+    choices.sort(() => Math.random() - 0.5);
+
+    return {
+      mode: 'fill_missing',
+      num1,
+      missingNum,
+      sum,
+      correctAnswer: missingNum,
+      choices,
+      promptText: `Điền số thích hợp vào dấu hỏi chấm: ${num1} + ? = ${sum}`,
+      hintText: `Số mấy cộng với ${num1} thì bằng ${sum} nhỉ?`
+    };
+  } else {
+    // Mode 2: Chú ếch nhảy tia số hoặc gộp đồ vật
+    const isNumberLine = Math.random() > 0.45;
+    const num1 = Math.floor(Math.random() * 6) + 1;
+    const num2 = Math.floor(Math.random() * (10 - num1)) + 1;
+    const sum = num1 + num2;
+
+    const choices = [sum];
+    while (choices.length < 3) {
+      const dist = Math.max(2, Math.min(10, sum + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 2) + 1)));
+      if (!choices.includes(dist)) choices.push(dist);
+    }
+    choices.sort(() => Math.random() - 0.5);
+
+    return {
+      mode: 'classic',
+      isNumberLine,
+      num1,
+      num2,
+      sum,
+      correctAnswer: sum,
+      choices,
+      promptText: isNumberLine
+        ? `Chú ếch nhảy về phía trước! ${num1} + ${num2} bằng bao nhiêu?`
+        : `Cùng làm phép cộng nào: ${num1} + ${num2} bằng bao nhiêu?`,
+      hintText: isNumberLine
+        ? `Bắt đầu từ số ${num1} và nhảy ${num2} bước sang phải nhé!`
+        : `Đếm tất cả các bạn nhỏ lại với nhau nhé!`
+    };
+  }
 }
 
 export function renderAdditionStage(question, onAnswer) {
@@ -36,7 +93,57 @@ export function renderAdditionStage(question, onAnswer) {
   container.style.flexDirection = 'column';
   container.style.alignItems = 'center';
 
-  if (question.isNumberLine) {
+  if (question.mode === 'three_nums') {
+    const card = document.createElement('div');
+    card.style.background = 'white';
+    card.style.borderRadius = '24px';
+    card.style.padding = '24px 30px';
+    card.style.boxShadow = 'var(--shadow-md)';
+    card.style.border = '3px solid #6ee7b7';
+    card.style.display = 'flex';
+    card.style.alignItems = 'center';
+    card.style.gap = '16px';
+    card.style.margin = '20px 0';
+    card.style.fontFamily = 'var(--font-heading)';
+    card.style.fontSize = '2.2rem';
+    card.style.fontWeight = '800';
+    card.style.color = '#065f46';
+
+    card.innerHTML = `
+      <span>${question.num1}</span>
+      <span style="color: #10b981;">+</span>
+      <span>${question.num2}</span>
+      <span style="color: #10b981;">+</span>
+      <span>${question.num3}</span>
+      <span style="color: #10b981;">=</span>
+      <span style="color: #d97706; background: #fef3c7; border: 2px dashed #f59e0b; padding: 4px 18px; border-radius: 16px;">?</span>
+    `;
+    container.appendChild(card);
+  } else if (question.mode === 'fill_missing') {
+    const card = document.createElement('div');
+    card.style.background = 'white';
+    card.style.borderRadius = '24px';
+    card.style.padding = '24px 30px';
+    card.style.boxShadow = 'var(--shadow-md)';
+    card.style.border = '3px solid #93c5fd';
+    card.style.display = 'flex';
+    card.style.alignItems = 'center';
+    card.style.gap = '16px';
+    card.style.margin = '20px 0';
+    card.style.fontFamily = 'var(--font-heading)';
+    card.style.fontSize = '2.4rem';
+    card.style.fontWeight = '800';
+    card.style.color = '#1e3a8a';
+
+    card.innerHTML = `
+      <span>${question.num1}</span>
+      <span style="color: #3b82f6;">+</span>
+      <span style="color: #ef4444; background: #fee2e2; border: 2px dashed #ef4444; padding: 4px 20px; border-radius: 16px;">?</span>
+      <span style="color: #3b82f6;">=</span>
+      <span>${question.sum}</span>
+    `;
+    container.appendChild(card);
+  } else if (question.isNumberLine) {
     // Number Line Frog Hop
     const lineWrapper = document.createElement('div');
     lineWrapper.className = 'number-line-container';
@@ -50,7 +157,6 @@ export function renderAdditionStage(question, onAnswer) {
     frog.textContent = '🐸';
     track.appendChild(frog);
 
-    // Position frog initially at num1
     const updateFrogPos = (idx) => {
       const pct = (idx / maxLine) * 100;
       frog.style.left = `calc(${pct}% - 22px)`;
@@ -85,7 +191,7 @@ export function renderAdditionStage(question, onAnswer) {
     lineWrapper.appendChild(track);
     container.appendChild(lineWrapper);
   } else {
-    // Visual Groups Combination
+    // Visual Groups
     const groupsWrap = document.createElement('div');
     groupsWrap.style.display = 'flex';
     groupsWrap.style.alignItems = 'center';
@@ -98,42 +204,33 @@ export function renderAdditionStage(question, onAnswer) {
       const box = document.createElement('div');
       box.style.display = 'flex';
       box.style.gap = '8px';
-      box.style.padding = '14px 20px';
       box.style.background = bg;
-      box.style.borderRadius = '20px';
-      box.style.border = '2px solid rgba(0,0,0,0.06)';
-
+      box.style.padding = '12px 16px';
+      box.style.borderRadius = '16px';
+      box.style.fontSize = '2rem';
       for (let i = 0; i < count; i++) {
-        const item = document.createElement('span');
-        item.style.fontSize = '2.8rem';
-        item.style.cursor = 'pointer';
-        item.textContent = emoji;
-        item.addEventListener('click', () => {
-          sounds.playPop();
-          item.style.transform = 'scale(1.3)';
-          setTimeout(() => item.style.transform = 'scale(1)', 200);
-        });
-        box.appendChild(item);
+        const span = document.createElement('span');
+        span.textContent = emoji;
+        box.appendChild(span);
       }
       return box;
     };
 
-    const g1 = createGroup(question.num1, '🐥', '#fef3c7');
-    const plus = document.createElement('span');
-    plus.textContent = '+';
-    plus.style.fontSize = '2.5rem';
-    plus.style.fontFamily = 'var(--font-heading)';
-    plus.style.color = '#4ade80';
+    groupsWrap.appendChild(createGroup(question.num1, '⭐️', '#fef9c3'));
 
-    const g2 = createGroup(question.num2, '🦆', '#e0f2fe');
+    const plusSign = document.createElement('span');
+    plusSign.style.fontSize = '2.5rem';
+    plusSign.style.fontWeight = 'bold';
+    plusSign.style.color = 'var(--primary-coral)';
+    plusSign.textContent = '+';
+    groupsWrap.appendChild(plusSign);
 
-    groupsWrap.appendChild(g1);
-    groupsWrap.appendChild(plus);
-    groupsWrap.appendChild(g2);
+    groupsWrap.appendChild(createGroup(question.num2, '🌟', '#fee2e2'));
+
     container.appendChild(groupsWrap);
   }
 
-  // Answer Choices
+  // Choices
   const choicesRow = document.createElement('div');
   choicesRow.className = 'choices-row';
 
@@ -142,7 +239,7 @@ export function renderAdditionStage(question, onAnswer) {
     btn.className = 'choice-btn';
     btn.textContent = val;
     btn.addEventListener('click', () => {
-      onAnswer(val === question.sum, btn);
+      onAnswer(val === question.correctAnswer, btn);
     });
     choicesRow.appendChild(btn);
   });

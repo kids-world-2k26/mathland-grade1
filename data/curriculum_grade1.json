@@ -25,7 +25,7 @@
         { "id": 3, "title": "Bài 3. Nhiều hơn, ít hơn, bằng nhau", "page": 20, "zone": "compare" },
         { "id": 4, "title": "Bài 4. So sánh số (Dấu >, <, =)", "page": 24, "zone": "compare" },
         { "id": 5, "title": "Bài 5. Mấy và mấy (Sơ đồ tách - gộp số)", "page": 32, "zone": "bonds" },
-        { "id": 6, "title": "Bài 6. Luyện tập chung", "page": 38, "zone": "counting" }
+        { "id": 6, "title": "Bài 6. Luyện tập chung (Tàu hỏa sắp xếp số)", "page": 38, "zone": "ordering" }
       ]
     },
     "chu_de_2": {
@@ -64,9 +64,9 @@
       "title": "Chủ đề 5: Ôn tập học kì 1",
       "page_start": 102,
       "lessons": [
-        { "id": 17, "title": "Bài 17. Ôn tập các số trong phạm vi 10", "page": 102, "zone": "counting" },
+        { "id": 17, "title": "Bài 17. Ôn tập các số trong phạm vi 10 (Sắp xếp dãy số)", "page": 102, "zone": "ordering" },
         { "id": 18, "title": "Bài 18. Ôn tập phép cộng, phép trừ trong phạm vi 10", "page": 106, "zone": "addition" },
-        { "id": 19, "title": "Bài 19. Ôn tập hình học", "page": 110, "zone": "shapes" },
+        { "id": 19, "title": "Bài 19. Ôn tập hình học (Đếm hình ghép)", "page": 110, "zone": "shapes" },
         { "id": 20, "title": "Bài 20. Ôn tập chung & Bài toán có lời văn", "page": 112, "zone": "wordproblems" }
       ]
     }
@@ -82,7 +82,7 @@
         { "id": 21, "title": "Bài 21. Số có hai chữ số (Các số đến 20: 1 chục = 10)", "page": 4, "zone": "tens" },
         { "id": 22, "title": "Bài 22. So sánh số có hai chữ số", "page": 16, "zone": "tens" },
         { "id": 23, "title": "Bài 23. Bảng các số từ 1 đến 100", "page": 22, "zone": "tens" },
-        { "id": 24, "title": "Bài 24. Luyện tập chung", "page": 24, "zone": "tens" }
+        { "id": 24, "title": "Bài 24. Luyện tập chung (Lật thẻ ghép cặp)", "page": 24, "zone": "memory" }
       ]
     },
     "chu_de_7": {
@@ -127,7 +127,7 @@
         { "id": 38, "title": "Bài 38. Ôn tập các số và phép tính trong phạm vi 10", "page": 88, "zone": "addition" },
         { "id": 39, "title": "Bài 39. Ôn tập các số và phép tính trong phạm vi 100", "page": 94, "zone": "tens" },
         { "id": 40, "title": "Bài 40. Ôn tập hình học và đo lường", "page": 100, "zone": "shapes" },
-        { "id": 41, "title": "Bài 41. Ôn tập chung & Đấu trường toán học", "page": 104, "zone": "wordproblems" }
+        { "id": 41, "title": "Bài 41. Ôn tập chung & Đấu trường toán học", "page": 104, "zone": "arena" }
       ]
     }
   }
